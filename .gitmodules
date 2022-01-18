@@ -1,0 +1,3 @@
+[submodule "wmis/extern/xgboost"]
+	path = wmis/extern/xgboost
+	url = https://github.com/dmlc/xgboost/
