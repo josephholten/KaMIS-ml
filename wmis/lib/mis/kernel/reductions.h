@@ -16,11 +16,12 @@
 #include <vector>
 #include <memory>
 #include <array>
+#include <xgboost/c_api.h>
 
 class branch_and_reduce_algorithm;
 
-enum reduction_type { neighborhood, fold2, clique, critical_set, clique_neighborhood_fast, clique_neighborhood, twin, domination, generalized_neighborhood, generalized_fold };
-constexpr size_t REDUCTION_NUM = 10;
+enum reduction_type { neighborhood, fold2, clique, critical_set, clique_neighborhood_fast, clique_neighborhood, twin, domination, generalized_neighborhood, generalized_fold, ml };
+constexpr size_t REDUCTION_NUM = 11;
 
 class vertex_marker {
 private:
@@ -246,6 +247,30 @@ private:
 	void fold(branch_and_reduce_algorithm* br_alg, NodeID main_node, fast_set& MWIS_set, NodeWeight MWIS_weight);
 
 	std::vector<restore_data> restore_vec;
+};
+
+struct ml_reduction : public general_reduction {
+    ml_reduction(size_t n);
+    ~ml_reduction() {}
+    virtual ml_reduction* clone() const final { return new ml_reduction(*this); }
+
+    virtual reduction_type get_reduction_type() const final { return reduction_type::ml; }
+    virtual bool reduce(branch_and_reduce_algorithm* br_alg) final;
+    virtual void restore(branch_and_reduce_algorithm* br_alg) final;
+    virtual void apply(branch_and_reduce_algorithm* br_alg) final;
+
+private:
+    BoosterHandle booster;
+    // float q = 0.95;
+
+    // struct restore_data {
+    //     // get IS_status::included and hidden (isolated)
+    //     std::vector<NodeID> likely;
+    //     // get IS_status::excluded
+    //     std::vector<NodeID> unlikely;
+    // };
+
+    // std::vector<restore_data> restore_vec;
 };
 
 

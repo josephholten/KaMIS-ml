@@ -59,6 +59,7 @@ public:
 class branch_and_reduce_algorithm {
 public:
 	enum IS_status { not_set, included, excluded, folded };
+    static const NodeID BRANCHING_TOKEN;
 
 private:
 	friend general_reduction;
@@ -72,6 +73,7 @@ private:
 	friend domination_reduction;
 	friend generalized_neighborhood_reduction;
 	friend generalized_fold_reduction;
+    friend ml_reduction;
 
 
 
@@ -107,7 +109,6 @@ private:
 		}
 	};
 
-	static constexpr NodeID BRANCHING_TOKEN = std::numeric_limits<NodeID>::max();
 	//static constexpr NodeID INITIAL_REDUCTION_TOKEN = BRANCHING_TOKEN - 1;
 
 	static bool is_token(NodeID node) {
@@ -204,6 +205,7 @@ public:
 	static void greedy_initial_is(graph_access& G, sized_vector<NodeID>& tmp_buffer);
 
 	NodeWeight get_current_is_weight() const;
+    NodeID get_remaining_nodes() const;
 	void reverse_reduction(graph_access & G, graph_access & reduced_G, std::vector<NodeID> & reverse_mapping);
 	void apply_branch_reduce_solution(graph_access & G);
 

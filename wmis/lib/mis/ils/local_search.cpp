@@ -13,6 +13,8 @@
 #include "random_functions.h"
 #include "bucket_array.h"
 
+const NodeID local_search::INVALID_NODE = std::numeric_limits<NodeID>::max();
+
 local_search::local_search(const MISConfig& config) {
 	sort_freenodes = config.sort_freenodes;
 }

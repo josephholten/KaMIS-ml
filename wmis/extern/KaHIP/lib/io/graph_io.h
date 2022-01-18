@@ -27,6 +27,9 @@ class graph_io {
                 static
                 int readGraphWeighted(graph_access & G, const std::string & filename);
 
+                static
+                NodeID readNumberOfNodes(const std::string & filename);
+
                 static 
                 int readGraphWeighted(graph_access & G, const std::string & filename, std::string & comments);
 
@@ -57,7 +60,8 @@ class graph_io {
                 template<typename vectortype>
                 static void readVector(std::vector<vectortype> & vec, const std::string & filename);
 
-
+                template<typename vectortype>
+                static void readVector(typename std::vector<vectortype>::iterator vec, NodeID len, const std::string & filename);
 };
 
 template<typename vectortype>
@@ -78,8 +82,8 @@ void graph_io::readVector(std::vector<vectortype> & vec, const std::string & fil
         // open file for reading
         std::ifstream in(filename.c_str());
         if (!in) {
-                std::cerr << "Error opening vectorfile" << filename << std::endl;
-                return;
+                std::cerr << "Error opening vectorfile " << filename << std::endl;
+                exit(1);
         }
 
         unsigned pos = 0;
@@ -89,12 +93,43 @@ void graph_io::readVector(std::vector<vectortype> & vec, const std::string & fil
                         continue;
                 }
 
-                vectortype value = (vectortype) atof(line.c_str());
+                auto value = (vectortype) atof(line.c_str());
                 vec[pos++] = value;
                 std::getline(in, line);
         }
 
         in.close();
+}
+
+template<typename vectortype>
+void graph_io::readVector(typename std::vector<vectortype>::iterator vec, NodeID len, const std::string & filename) {
+
+    std::string line;
+
+    // open file for reading
+    std::ifstream in(filename.c_str());
+    if (!in) {
+        std::cerr << "Error opening vectorfile " << filename << std::endl;
+        exit(1);
+    }
+
+    unsigned pos = 0;
+    std::getline(in, line);
+    while( !in.eof() && pos < len) {
+        if (line[0] == '%') { //Comment
+            continue;
+        }
+        if (pos >= len) {
+            std::cerr << "File `" << filename << "` longer than specified len (" << len << ")!";
+            break;
+        }
+
+        auto value = (vectortype) atof(line.c_str());
+        vec[pos++] = value;
+        std::getline(in, line);
+    }
+
+    in.close();
 }
 
 #endif /*GRAPHIO_H_*/

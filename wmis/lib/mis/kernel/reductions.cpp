@@ -9,6 +9,9 @@
 #include "algorithms/push_relabel.h"
 
 #include <utility>
+#include <safe_c_api.h>
+#include <ml_features.h>
+#include <numeric>
 
 
 typedef branch_and_reduce_algorithm::IS_status IS_status;
@@ -1082,3 +1085,94 @@ void generalized_fold_reduction::apply(branch_and_reduce_algorithm* br_alg) {
 		status.is_weight += status.weights[nodes.main];
 	}
 }
+
+ml_reduction::ml_reduction(size_t n) : general_reduction(n) {
+    // init booster
+    safe_xgboost(XGBoosterCreate(nullptr, 0, &booster));
+    safe_xgboost(XGBoosterSetParam(booster, "eta", "1"));
+    safe_xgboost(XGBoosterSetParam(booster, "nthread", "16"));
+
+    safe_xgboost(XGBoosterLoadModel(booster, "../../models/standard.model"));
+
+    bst_ulong num_of_features;
+    safe_xgboost(XGBoosterGetNumFeature(booster, &num_of_features));
+    assert(num_of_features == ml_features::FEATURE_NUM);
+}
+
+bool ml_reduction::reduce(branch_and_reduce_algorithm* br_alg) {
+    auto &status = br_alg->status;
+    if (status.remaining_nodes <= 1)
+        return false;
+
+    // current (kamis-reduced) graph
+    graph_access G;
+    // from new NodeID's to old
+    std::vector<NodeID> reverse_mapping(br_alg->get_remaining_nodes(), -1);
+    br_alg->build_graph_access(G, reverse_mapping);
+
+    // config ???
+    ml_features feature_mat = ml_features(G);
+    feature_mat.initDMatrix();
+
+    // predict
+    bst_ulong out_len = 0;
+    const float *_prediction = nullptr;
+    safe_xgboost(XGBoosterPredict(booster, feature_mat.getDMatrix(), 0, 0, 0, &out_len, &_prediction));
+    ASSERT_EQ(out_len, G.number_of_nodes());
+
+    std::vector<float> prediction;
+    prediction.assign(_prediction, _prediction + out_len);
+
+    // if (q > *min_max.first || 1-q < *min_max.second) {
+    //     auto min_change = std::min(q - *min_max.second, *min_max.first - (1-q));
+    //     q = (q-min_change) * 0.95f;
+    // }
+
+    // sort nodes by their prediction
+    std::vector<NodeID> high_candidates = std::vector<NodeID>(G.number_of_nodes(), 0);
+    std::iota(high_candidates.begin(), high_candidates.end(), 0);
+    std::sort(high_candidates.begin(), high_candidates.end(),
+              [&prediction](const NodeID& n1, const NodeID& n2){ return prediction[n1] < prediction[n2]; }
+    );
+
+    // include upper 5% of nodes
+    for(size_t index = 0; index < std::ceil(high_candidates.size()*0.05); ++index) {
+        auto node = high_candidates[index];
+        if (status.node_status[reverse_mapping[node]] == IS_status::not_set) {
+            // force high confidence nodes into IS
+            br_alg->set(reverse_mapping[node], IS_status::included);
+            // and exclude all it's neighbors
+            forall_out_edges(G, edge, node) {
+                NodeID neighbor = G.getEdgeTarget(node);
+                if (status.node_status[reverse_mapping[node]] == IS_status::not_set) {
+                    br_alg->set(reverse_mapping[neighbor], IS_status::excluded);
+                }
+            } endfor
+        }
+    }
+
+    // remove lower 5% nodes
+    for(size_t index = std::floor(high_candidates.size()*0.95); index < high_candidates.size(); ++index) {
+        auto node = high_candidates[index];
+        if (status.node_status[reverse_mapping[node]] == IS_status::not_set) {
+            br_alg->set(reverse_mapping[node], IS_status::excluded);
+        }
+    }
+
+    return true;  // this reduction needs to always be able to reduce
+}
+
+// don't think I need to do this either ... ?
+void ml_reduction::restore(branch_and_reduce_algorithm *br_alg) {
+
+}
+
+// don't think I need this since whether we set a node to included/ excluded does not depend on future events
+void ml_reduction::apply(branch_and_reduce_algorithm *br_alg) {
+
+}
+
+// Questions:
+// - what exactly is reverse_mapping? what direction?
+// - do I need restore or apply
+// - what can I use run_ils? do I need to do setup? what parameters should I use?

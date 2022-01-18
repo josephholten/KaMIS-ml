@@ -106,7 +106,7 @@ int graph_io::readGraphWeighted(graph_access & G, const std::string & filename) 
         std::ifstream in(filename.c_str());
         if (!in) {
                 std::cerr << "Error opening " << filename << std::endl;
-                return 1;
+                exit(1);
         }
 
         long nmbNodes;
@@ -126,7 +126,7 @@ int graph_io::readGraphWeighted(graph_access & G, const std::string & filename) 
 
         if( 2*nmbEdges > std::numeric_limits<int>::max() || nmbNodes > std::numeric_limits<int>::max()) {
                 std::cerr <<  "The graph is too large. Currently only 32bit supported!"  << std::endl;
-                exit(0);
+                exit(1);
         }
 
         bool read_ew = false;
@@ -325,6 +325,34 @@ int graph_io::readGraphWeighted(graph_access & G, const std::string & filename, 
         return 0;
 }
 
+NodeID graph_io::readNumberOfNodes(const std::string &filename) {
+    std::string line;
+
+    // open file for reading
+    std::ifstream in(filename.c_str());
+    if (!in) {
+        std::cerr << "Error opening " << filename << std::endl;
+        exit(1);
+    }
+
+    long nmbNodes;
+    long nmbEdges;
+
+    std::getline(in,line);
+    //skip comments
+    while( line[0] == '%' ) {
+        std::getline(in, line);
+    }
+
+    int ew = 0;
+    std::stringstream ss(line);
+    ss >> nmbNodes;
+    ss >> nmbEdges;
+    ss >> ew;
+    return nmbNodes;
+}
+
+
 void graph_io::writePartition(graph_access & G, const std::string & filename) {
         std::ofstream f(filename.c_str());
         std::cout << "writing partition to " << filename << " ... " << std::endl;
@@ -346,4 +374,3 @@ void graph_io::writeIndependentSet(graph_access & G, std::string filename) {
 
         f.close();
 }
-

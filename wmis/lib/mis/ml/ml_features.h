@@ -9,7 +9,7 @@
 #include <mis_config.h>
 
 #include "graph_access.h"
-#include "tools/safe_c_api.h"
+#include "safe_c_api.h"
 
 class matrix {
 public:
@@ -36,10 +36,10 @@ private:
 
 class ml_features {
 public:
-    static const int FEATURE_NUM = 13;
+    static constexpr int FEATURE_NUM = 13;
 
-    explicit ml_features(MISConfig config, graph_access& G);   // for single graph
-    explicit ml_features(MISConfig config);    // for multiple graphs
+    explicit ml_features(graph_access& G);   // for single graph
+    explicit ml_features();    // for multiple graphs
     ~ml_features();
 
     [[nodiscard]] static int getNumberOfFeatures() ;
@@ -60,6 +60,7 @@ private:
     enum feature : int { NODES=0, EDGES=1, DEG=2, CHI2_DEG=3, AVG_CHI2_DEG=4, LCC=5, CHI2_LCC=6, CHROMATIC=7, T_WEIGHT=8, NODE_W=9, W_DEG=10, CHI2_W_DEG=11, LOCAL_SEARCH=12 };
 
     MISConfig mis_config;
+    int ls_rounds = 5;
     size_t current_size {0};
     matrix feature_matrix;
     bool has_labels;
@@ -71,7 +72,6 @@ private:
     void features(graph_access& G);
 
     DMatrixHandle dmat;
-
 };
 
 #endif //MWIS_ML_ML_FEATURES_H

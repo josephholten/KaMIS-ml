@@ -106,11 +106,11 @@ class local_search {
          * and check if it's valid.
          */
         void print_permutation();
+        static const NodeID INVALID_NODE;
 
     private:
 		// insertion node of a (1,2)-swap
 		using Swap_1_2 = std::pair<NodeID, NodeID>;
-		static const NodeID INVALID_NODE = std::numeric_limits<NodeID>::max();
 
         // List of 1-tight neighbors of a node.
         std::vector<NodeID> onetight;

@@ -56,7 +56,7 @@ void initial_is(graph_access& G) {
     }
 }
 
-bool is_IS(graph_access& G) {
+bool ls_is_IS(graph_access& G) {
     forall_nodes(G, node) {
                 if (G.getPartitionIndex(node) == 1) {
                     forall_out_edges(G, edge, node) {
@@ -112,7 +112,7 @@ void perform_ils(const MISConfig& mis_config, graph_access& G, NodeWeight weight
         std::cout << "MIS_weight " << is_weight << std::endl;
 }
 
-void assign_weights(graph_access& G, const MISConfig& mis_config) {
+void ls_assign_weights(graph_access& G, const MISConfig& mis_config) {
     constexpr NodeWeight MAX_WEIGHT = 200;
 
     if (mis_config.weight_source == MISConfig::Weight_Source::HYBRID) {

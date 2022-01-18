@@ -12,19 +12,29 @@
 #include "configuration_mis.h"
 #include "timer.h"
 #include "graph_io.h"
-#include "wmis_interface/weighted_ls.h"
-#include "tools/stat.h"
+#include "weighted_ls.h"
+#include "stat.h"
 
 // constructors
 // for training (many graphs with labels)
-ml_features::ml_features(MISConfig config)
-    : feature_matrix(FEATURE_NUM), has_labels {true}, mis_config {std::move(config)}
-{}
+ml_features::ml_features()
+    : feature_matrix(FEATURE_NUM), has_labels {true}
+{
+    configuration_mis cfg;
+    cfg.standard(mis_config);
+    mis_config.console_log = false;
+    mis_config.time_limit = 5.0;
+
+}
 
 // for reducing (single graph without labels)
-ml_features::ml_features(MISConfig config, graph_access &G)
-    : feature_matrix(FEATURE_NUM), has_labels {false}, mis_config {std::move(config)}
+ml_features::ml_features(graph_access &G)
+    : feature_matrix(FEATURE_NUM), has_labels {false}
 {
+    configuration_mis cfg;
+    cfg.standard(mis_config);
+    mis_config.console_log = false;
+    mis_config.time_limit = 5.0;
     reserveNodes(G.number_of_nodes());
     fillGraph(G);
 }
@@ -106,10 +116,6 @@ float& ml_features::getFeature(NodeID node) {
 void ml_features::features(graph_access& G) {
     timer t;
 
-    // precalculation
-    const NodeID number_of_nodes = G.number_of_nodes();
-    const EdgeID number_of_edges = G.number_of_edges();
-
     NodeWeight total_weight = 0;
     forall_nodes(G, node) {
         total_weight += G.getNodeWeight(node);
@@ -133,12 +139,6 @@ void ml_features::features(graph_access& G) {
 
     // local search
     std::vector<int> ls_signal(G.number_of_nodes(), 0);
-    const int ls_rounds = 5;  // TODO: in config
-    configuration_mis cfg;
-    cfg.standard(mis_config);
-    mis_config.console_log = false;
-    mis_config.time_limit = 5.0;
-
     std::random_device rd;
 
     // TODO: log correctly

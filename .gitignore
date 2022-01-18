@@ -31,5 +31,13 @@
 *.log
 *.dblite
 docs/*
+models
+
+# Executable folders
 deploy
 optimized
+cmake-*
+**/_xgboost
+
+# IDE
+.idea
