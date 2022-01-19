@@ -31,7 +31,6 @@
 *.log
 *.dblite
 docs/*
-models
 
 # Executable folders
 deploy
