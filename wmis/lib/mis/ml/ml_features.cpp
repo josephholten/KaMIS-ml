@@ -6,7 +6,6 @@
 
 #include <random>
 #include <unordered_set>
-#include <omp.h>
 
 #include "mis_config.h"
 #include "configuration_mis.h"
@@ -17,24 +16,27 @@
 
 // constructors
 // for training (many graphs with labels)
-ml_features::ml_features()
+ml_features::ml_features(const MISConfig& config)
     : feature_matrix(FEATURE_NUM), has_labels {true}
 {
     configuration_mis cfg;
     cfg.standard(mis_config);
     mis_config.console_log = false;
-    mis_config.time_limit = 5.0;
-
+    mis_config.ml_pruning = config.ml_pruning;
+    mis_config.time_limit = config.ls_time;
+    mis_config.ls_rounds = config.ls_rounds;
 }
 
 // for reducing (single graph without labels)
-ml_features::ml_features(graph_access &G)
+ml_features::ml_features(const MISConfig& config, graph_access &G)
     : feature_matrix(FEATURE_NUM), has_labels {false}
 {
     configuration_mis cfg;
     cfg.standard(mis_config);
     mis_config.console_log = false;
-    mis_config.time_limit = 5.0;
+    mis_config.ml_pruning = config.ml_pruning;
+    mis_config.time_limit = config.ls_time;
+    mis_config.ls_rounds = config.ls_rounds;
     reserveNodes(G.number_of_nodes());
     fillGraph(G);
 }
@@ -142,7 +144,7 @@ void ml_features::features(graph_access& G) {
     std::random_device rd;
 
     // TODO: log correctly
-    for (int round = 0; round < ls_rounds; ++round) {
+    for (int round = 0; round < mis_config.ls_rounds; ++round) {
         // TODO: only reduce the graph once, then perform the LS rounds with different seeds
         mis_config.seed = (int) rd();
         std::cout << "LOG: ml-features: starting ls round " << round << " ... " << std::flush;
@@ -211,7 +213,7 @@ void ml_features::features(graph_access& G) {
         avg_wdeg = getFeature<W_DEG>(node);
 
         // local search
-        getFeature<LOCAL_SEARCH>(node) += (float) ls_signal[node] / ls_rounds;
+        getFeature<LOCAL_SEARCH>(node) += (float) ls_signal[node] / mis_config.ls_rounds;
 
     } endfor
 

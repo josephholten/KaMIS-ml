@@ -50,6 +50,12 @@ struct MISConfig {
     Weight_Source weight_source;
     // Choose reduction order and amount for given graph type
     Reduction_Style reduction_style;
+    // Number of local search signals to compute for ML reductions
+    int ls_rounds;
+    // Time limit for the local search signals (in seconds)
+    double ls_time;
+    // How aggresively to prune vertices based on the ML prediction
+    float ml_pruning;
 
 
     void setReductionStyle(const std::string & redu_style) {

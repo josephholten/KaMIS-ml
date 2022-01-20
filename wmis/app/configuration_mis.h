@@ -47,6 +47,10 @@ inline void configuration_mis::standard( MISConfig & mis_config ) {
     mis_config.reduction_style                         = MISConfig::Reduction_Style::NORMAL;
     // Weights
     mis_config.weight_source                          = MISConfig::Weight_Source::FILE;
+    // ML
+    mis_config.ls_rounds                              = 5;
+    mis_config.ls_time                                = 5;
+    mis_config.ml_pruning                             = 0.95;
 }
 
 #endif

@@ -1110,8 +1110,7 @@ bool ml_reduction::reduce(branch_and_reduce_algorithm* br_alg) {
     std::vector<NodeID> reverse_mapping(br_alg->get_remaining_nodes(), -1);
     br_alg->build_graph_access(G, reverse_mapping);
 
-    // config ???
-    ml_features feature_mat = ml_features(G);
+    ml_features feature_mat = ml_features(br_alg->config, G);
     feature_mat.initDMatrix();
 
     // predict
