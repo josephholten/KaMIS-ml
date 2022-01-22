@@ -1,7 +1,6 @@
 import os
 import subprocess
 import json
-from dataclasses import dataclass
 
 graph_directory = "/home/jholten/test_graphs"
 output_directory = "/home/jholten/perf_tests_kamis_ml"
@@ -11,9 +10,9 @@ executable = "/home/jholten/KaMIS-ml/deploy/iterative_ml"
 
 class Config:
     def __init__(self, test_number):
-        self.ls_rounds = 5
-        self.ls_time = 5
-        self.ml_pruning = 0.95
+        self.ls_rounds = [5]
+        self.ls_time = [5]
+        self.ml_pruning = [0.95]
         self.test_number = test_number
 
     def write_to_file(self):
