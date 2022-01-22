@@ -54,6 +54,8 @@ struct MISConfig {
     int ls_rounds;
     // Time limit for the local search signals (in seconds)
     double ls_time;
+    // Print updates for local search signal in ML reductions
+    bool ls_updates;
     // How aggresively to prune vertices based on the ML prediction
     float ml_pruning;
 

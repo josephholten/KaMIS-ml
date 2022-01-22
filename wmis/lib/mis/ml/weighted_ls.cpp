@@ -30,7 +30,7 @@
 //#include "parse_parameters.h"
 #include "branch_and_reduce_algorithm.h"
 
-void initial_is(graph_access& G) {
+void ls_initial_is(graph_access& G) {
     std::vector<NodeID> nodes(G.number_of_nodes());
     for (size_t i = 0; i < nodes.size(); i++) {
         nodes[i] = i;
@@ -71,14 +71,14 @@ bool ls_is_IS(graph_access& G) {
     return true;
 }
 
-std::vector<NodeID> reverse_mapping;
-NodeWeight perform_reduction(std::unique_ptr<branch_and_reduce_algorithm>& reducer, graph_access& G, graph_access& rG, const MISConfig& config) {
+std::vector<NodeID> ls_reverse_mapping;
+NodeWeight ls_perform_reduction(std::unique_ptr<branch_and_reduce_algorithm>& reducer, graph_access& G, graph_access& rG, const MISConfig& config) {
     reducer = std::unique_ptr<branch_and_reduce_algorithm>(new branch_and_reduce_algorithm(G, config));
     reducer->reduce_graph();
 
     // Retrieve reduced graph
-    reverse_mapping = std::vector<NodeID>(G.number_of_nodes(), 0);
-    reducer->build_graph_access(rG, reverse_mapping);
+    ls_reverse_mapping = std::vector<NodeID>(G.number_of_nodes(), 0);
+    reducer->build_graph_access(rG, ls_reverse_mapping);
 
     if (!is_IS(rG)) {
         std::cerr << "ERROR: reduced graph is not independent" << std::endl;
@@ -90,9 +90,9 @@ NodeWeight perform_reduction(std::unique_ptr<branch_and_reduce_algorithm>& reduc
     return is_weight;
 }
 
-void perform_ils(const MISConfig& mis_config, graph_access& G, NodeWeight weight_offset) {
+void ls_perform_ils(const MISConfig& mis_config, graph_access& G, NodeWeight weight_offset) {
     ils local(mis_config);
-    initial_is(G);
+    ls_initial_is(G);
     local.perform_ils(G, 1000000, weight_offset);
 
     if (!is_IS(G)) {
@@ -136,7 +136,7 @@ void ls_assign_weights(graph_access& G, const MISConfig& mis_config) {
     }
 }
 
-NodeWeight extractReductionOffset(const std::string & comments) {
+NodeWeight ls_extractReductionOffset(const std::string & comments) {
     std::stringstream comments_ss(comments);
     const std::string prefix = "%reduction_offset ";
     std::string line;
@@ -173,7 +173,7 @@ void weighted_ls::run_ils() {
     // graph_access G;
     // std::string comments;
     // graph_io::readGraphWeighted(G, graph_filepath, comments);
-    // assign_weights(G, mis_config);
+    // ls_assign_weights(G, mis_config);
 
     mis_log::instance()->set_graph(G);
 
@@ -206,24 +206,26 @@ void weighted_ls::run_ils() {
         graph_access rG;
 
         auto start = std::chrono::system_clock::now();
-        weight_offset = perform_reduction(reducer, G, rG, mis_config);
+        weight_offset = ls_perform_reduction(reducer, G, rG, mis_config);
         auto end = std::chrono::system_clock::now();
 
         std::chrono::duration<float> reduction_time = end - start;
 
         //std::cout << "%reduction_nodes " << rG.number_of_nodes() << "\n";
         //std::cout << "%reduction_time " << reduction_time.count() << "\n";
-        //std::cout << "%reduction_offset " << weight_offset << std::endl;
+        // this should not be executed!
+        if (weight_offset != 0)
+            std::cout << std::endl << "ls_reduction_offset " << weight_offset << "" << std::endl;
 
         if (rG.number_of_nodes() != 0) {
-            perform_ils(mis_config, rG, weight_offset);
+            ls_perform_ils(mis_config, rG, weight_offset);
         } else {
             // std::cout << "MIS_weight " << weight_offset << std::endl;
         }
 
-        reducer->reverse_reduction(G, rG, reverse_mapping);
+        reducer->reverse_reduction(G, rG, ls_reverse_mapping);
 
-        if (!is_IS(G)) {
+        if (!ls_is_IS(G)) {
             std::cerr << "ERROR: graph after inverse reduction is not independent" << std::endl;
             exit(1);
         } else {
@@ -240,10 +242,10 @@ void weighted_ls::run_ils() {
         }
     } else {
         // run local search whithout reductions
-        // weight_offset = extractReductionOffset(comments);
+        // weight_offset = ls_extractReductionOffset(comments);
 
         // std::cout << comments;
-        perform_ils(mis_config, G, weight_offset);
+        ls_perform_ils(mis_config, G, weight_offset);
     }
 
     // if (mis_config.write_graph) graph_io::writeIndependentSet(G, mis_config.output_filename);

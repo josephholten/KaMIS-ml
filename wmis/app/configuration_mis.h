@@ -50,6 +50,7 @@ inline void configuration_mis::standard( MISConfig & mis_config ) {
     // ML
     mis_config.ls_rounds                              = 5;
     mis_config.ls_time                                = 5;
+    mis_config.ls_updates                             = false;
     mis_config.ml_pruning                             = 0.95;
 }
 
