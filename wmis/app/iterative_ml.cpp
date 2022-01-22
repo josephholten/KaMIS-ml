@@ -19,7 +19,7 @@
 #include "graph_access.h"
 #include "graph_io.h"
 #include "mis_config.h"
-#include "parse_parameters.h"
+#include "parse_parameters_ml.h"
 #include "branch_and_reduce_algorithm.h"
 
 
@@ -70,7 +70,7 @@ int main(int argn, char **argv) {
         std::string graph_filepath;
 
         // Parse the command line parameters;
-        int ret_code = parse_parameters(argn, argv, mis_config, graph_filepath);
+        int ret_code = parse_parameters_ml(argn, argv, mis_config, graph_filepath);
         if (ret_code) {
                 return 0;
         }

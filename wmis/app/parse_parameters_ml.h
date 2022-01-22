@@ -21,7 +21,7 @@
  *
  * @return -1 if there was an error. 0 otherwise.
  */
-int parse_parameters(int argn, char **argv,
+int parse_parameters_ml(int argn, char **argv,
                      MISConfig & mis_config,
                      std::string & graph_filename) {
     const char *progname = argv[0];
@@ -38,6 +38,10 @@ int parse_parameters(int argn, char **argv,
 	struct arg_lit *disable_reduction   = arg_lit0(NULL, "disable_reduction", "Don't perforn any reductions.");
     struct arg_str *weight_source       = arg_str0(NULL, "weight_source", NULL, "Choose how the weights are assigned. Can be either: file (default), hybrid, uniform, geometric.");
     struct arg_str *reduction_style     = arg_str0(NULL, "reduction_style", NULL, "Choose the type of reductions appropriate for the input graph. Can be either: normal/sparse (default), dense/osm.");
+    struct arg_int *ls_rounds           = arg_int0(NULL, "ls_rounds", NULL, "Number of local search signals to compute for ML reductions");
+    struct arg_dbl *ls_time             = arg_dbl0(NULL, "ls_time", NULL, "Time limit for local search signals in ML reductions");
+    struct arg_lit *ls_updates          = arg_lit0(NULL, "ls_updates", "Print updates in local search signal in ML reductions");
+    struct arg_dbl *ml_pruning          = arg_dbl0(NULL, "ml_pruning", NULL, "How aggresively to prune vertices based on the ML prediction");
 
     struct arg_end *end                 = arg_end(100);
 
@@ -54,6 +58,10 @@ int parse_parameters(int argn, char **argv,
 			//disable_reduction,
             weight_source,
             reduction_style,
+            ls_rounds,
+            ls_time,
+            ls_updates,
+            ml_pruning,
             end
     };
 
@@ -123,6 +131,22 @@ int parse_parameters(int argn, char **argv,
         mis_config.write_graph = true;
     } else {
         mis_config.write_graph = false;
+    }
+
+    if (ls_rounds->count > 0) {
+        mis_config.ls_rounds = ls_rounds->ival[0];
+    }
+
+    if (ls_time->count > 0) {
+        mis_config.ls_time = ls_time->dval[0];
+    }
+
+    if (ls_updates->count > 0) {
+        mis_config.ls_updates = true;
+    }
+
+    if (ml_pruning->count > 0) {
+        mis_config.ml_pruning = (float) ml_pruning->dval[0];
     }
 
     arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));

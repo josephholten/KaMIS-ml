@@ -154,8 +154,6 @@ set(SOURCES
         lib/mis/initial_mis/greedy_vertex.cpp
         lib/mis/initial_mis/random_mis.cpp
         lib/mis/initial_mis/initial_mis.cpp
-        lib/mis/ml/ml_features.cpp
-        lib/mis/ml/weighted_ls.cpp
         lib/data_structure/mis_permutation.cpp
         lib/data_structure/candidate_list.cpp
         lib/data_structure/operation_log.cpp
@@ -166,14 +164,20 @@ set(SOURCES
 
 add_library(libsources OBJECT ${SOURCES})
 
+set(ML_SOURCES
+        lib/mis/ml/ml_features.cpp
+        lib/mis/ml/weighted_ls.cpp
+)
+
+add_library(libml ${ML_SOURCES})
+
 add_subdirectory(extern/xgboost)
 
 add_executable(branch_reduce "app/branch_reduce.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources>)
-target_link_libraries(branch_reduce xgboost)
-add_executable(iterative_ml "app/iterative_ml.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources>)
+target_link_libraries(branch_reduce)
+add_executable(iterative_ml "app/iterative_ml.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
 target_link_libraries(iterative_ml xgboost)
 add_executable(weighted_ls "app/weighted_ls.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources>)
-target_link_libraries(weighted_ls xgboost)
 add_executable(merge_graph_weights "app/merge_graph_weights.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources>)
 
 
