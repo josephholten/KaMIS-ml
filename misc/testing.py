@@ -1,6 +1,7 @@
 import os
 import subprocess
 import json
+from multiprocessing import Pool
 
 graph_directory = "/home/jholten/test_graphs"
 output_directory = "/home/jholten/perf_tests_kamis_ml"
@@ -39,6 +40,8 @@ def exec_iterative_ml(config, graph_filename):
             f"--ls_rounds={config.ls_rounds}",
             f"--ls_time={config.ls_time}",
             f"--ml_pruning={config.ml_pruning}",
+            ">",
+            f"{output_directory}/{test_number}/{graph_filename}.output"
     ]
     # subprocess.run(args)
     print(args)
@@ -54,8 +57,8 @@ if __name__ == "__main__":
     os.mkdir(os.path.join(output_directory, test_number), dir_permissions)
     print(f"test #{test_number}")
 
-    with Config(test_number) as config:
+    with Config(test_number) as config, Pool(processes=os.cpu_count()) as pool:
         for graph_filename in os.listdir(graph_directory):
             graph_filepath = os.path.join(graph_directory, graph_filename)
             if os.path.isfile(graph_filepath):
-                exec_iterative_ml(config, graph_filename)
+                pool.apply_async(exec_iterative_ml, (config, graph_filename))

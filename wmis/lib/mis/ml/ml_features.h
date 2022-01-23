@@ -13,19 +13,20 @@
 
 class matrix {
 public:
+    // TODO: add row reserving constructor
     explicit matrix(size_t _cols) : cols {_cols} {};
 
-    void addRows(size_t _rows) {
+    inline void addRows(size_t _rows) {
         rows += _rows;
         data.resize(data.size() + rows*cols);
     }
 
-    std::vector<float>::iterator operator[](size_t idx) { return data.begin() + idx*cols; };
+    inline std::vector<float>::iterator operator[](size_t idx) { return data.begin() + idx*cols; };
 
-    size_t getRows() { return rows; };
-    size_t getCols() { return cols; };
+    inline size_t getRows() { return rows; };
+    inline size_t getCols() { return cols; };
 
-    float* c_arr() { return &data[0]; };
+    inline float* c_arr() { return &data[0]; };
 
 private:
     size_t cols {};
@@ -34,6 +35,7 @@ private:
     std::vector<float> data;
 };
 
+// TODO: possibly inherit from matrix?
 class ml_features {
 public:
     static constexpr int FEATURE_NUM = 13;
@@ -57,7 +59,8 @@ public:
 
 
 private:
-    enum feature : int { NODES=0, EDGES=1, DEG=2, CHI2_DEG=3, AVG_CHI2_DEG=4, LCC=5, CHI2_LCC=6, CHROMATIC=7, T_WEIGHT=8, NODE_W=9, W_DEG=10, CHI2_W_DEG=11, LOCAL_SEARCH=12 };
+    enum feature : int { NODES=0, EDGES=1, DEG=2, CHI2_DEG=3, AVG_CHI2_DEG=4, LCC=5, CHI2_LCC=6, CHROMATIC=7, T_WEIGHT=8, NODE_W=9, W_DEG=10, CHI2_W_DEG=11, LOCAL_SEARCH=12, FEATURE_NUM_ENUM };
+    static_assert(ml_features::FEATURE_NUM == FEATURE_NUM_ENUM, "assure ml_features::FEATURE_NUM is correct");
 
     MISConfig mis_config;
     size_t current_size {0};

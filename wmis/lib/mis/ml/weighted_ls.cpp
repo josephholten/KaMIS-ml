@@ -215,7 +215,7 @@ void weighted_ls::run_ils() {
         //std::cout << "%reduction_time " << reduction_time.count() << "\n";
         // this should not be executed!
         if (weight_offset != 0)
-            std::cout << std::endl << "ls_reduction_offset " << weight_offset << "" << std::endl;
+            std::cout << "ls_reduction_offset " << weight_offset << "" << std::endl;
 
         if (rG.number_of_nodes() != 0) {
             ls_perform_ils(mis_config, rG, weight_offset);
@@ -232,10 +232,10 @@ void weighted_ls::run_ils() {
             NodeWeight is_weight = 0;
 
             forall_nodes(G, node) {
-                        if (G.getPartitionIndex(node) == 1) {
-                            is_weight += G.getNodeWeight(node);
-                        }
-                    } endfor
+                if (G.getPartitionIndex(node) == 1) {
+                    is_weight += G.getNodeWeight(node);
+                }
+            } endfor
 
             if (mis_config.console_log)
                 std::cout << "MIS_weight_check " << is_weight << std::endl;

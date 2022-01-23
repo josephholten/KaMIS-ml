@@ -1104,6 +1104,11 @@ bool ml_reduction::reduce(branch_and_reduce_algorithm* br_alg) {
     if (status.remaining_nodes <= 1)
         return false;
 
+    if (br_alg->config.console_log) {
+        std::cout << "-------------------------------------" << std::endl;
+        std::cout << "remaining_nodes " << status.remaining_nodes << std::endl;
+    }
+
     // current (kamis-reduced) graph
     graph_access G;
     // from new NodeID's to old

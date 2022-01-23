@@ -5,12 +5,14 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release) 
 endif (NOT CMAKE_BUILD_TYPE)
 
+set(CMAKE_CXX_STANDARD 17)
+
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -march=native -fPIC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -fPIC")
 endif(CMAKE_BUILD_TYPE STREQUAL Debug)
 
 if (CMAKE_BUILD_TYPE STREQUAL Release)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -fno-omit-frame-pointer -march=native -DNDEBUG -fPIC -O3")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -march=native -DNDEBUG -fPIC -O3")
 endif(CMAKE_BUILD_TYPE STREQUAL Release)
 
 CHECK_CXX_COMPILER_FLAG(-Wno-unused-value COMPILER_SUPPORTS_NOUNUSED)

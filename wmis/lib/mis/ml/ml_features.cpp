@@ -21,7 +21,7 @@ ml_features::ml_features(const MISConfig& config)
 {
     configuration_mis cfg;
     cfg.standard(mis_config);
-    mis_config.console_log = false;
+    mis_config.console_log = config.console_log;
     mis_config.ml_pruning = config.ml_pruning;
     mis_config.time_limit = config.ls_time;
     mis_config.ls_rounds = config.ls_rounds;
@@ -33,7 +33,8 @@ ml_features::ml_features(const MISConfig& config, graph_access &G)
 {
     configuration_mis cfg;
     cfg.standard(mis_config);
-    mis_config.console_log = false;
+    mis_config.console_log = config.console_log;
+    mis_config.ls_updates = config.ls_updates;
     mis_config.ml_pruning = config.ml_pruning;
     mis_config.time_limit = config.ls_time;
     mis_config.ls_rounds = config.ls_rounds;
@@ -116,7 +117,7 @@ float& ml_features::getFeature(NodeID node) {
 }
 
 void ml_features::features(graph_access& G) {
-    timer t;
+    // timer t;
 
     NodeWeight total_weight = 0;
     forall_nodes(G, node) {
@@ -126,7 +127,6 @@ void ml_features::features(graph_access& G) {
     // greedy node coloring
     std::vector<int> node_coloring(G.number_of_nodes());
     std::vector<bool> available(G.number_of_nodes(), true);
-    std::cout << "LOG: ml-features: starting greedy node coloring  ... " << std::flush;
 
     forall_nodes(G, node) {
         std::fill(available.begin(), available.end(), true);
@@ -137,30 +137,45 @@ void ml_features::features(graph_access& G) {
     } endfor
     int greedy_chromatic_number = *std::max_element(node_coloring.begin(), node_coloring.end()) + 1;
     std::vector<bool> used_colors(greedy_chromatic_number);
-    std::cout << "done.\n";
 
     // local search
     std::vector<int> ls_signal(G.number_of_nodes(), 0);
     std::random_device rd;
+    // int seed = rd();
+    // mis_config.seed = seed;
 
     // TODO: log correctly
     for (int round = 0; round < mis_config.ls_rounds; ++round) {
         // TODO: only reduce the graph once, then perform the LS rounds with different seeds
         mis_config.seed = (int) rd();
-        std::cout << "LOG: ml-features: starting ls round " << round << " ... " << std::flush;
-        t.restart();
+        std::cout << "ls_round " << round << std::endl;
         weighted_ls ls(mis_config, G);
         ls.run_ils();
-        auto t_ils = t.elapsed();
-        t.restart();
         forall_nodes(G, node) {
             ls_signal[node] += (int) G.getPartitionIndex(node);
         } endfor
-        std::cout << "done"
-                  << " (ils: " << t_ils << ", signal: " << t.elapsed() << "s)"
-                  << ".\n";
     }
 
+    if (mis_config.console_log) {
+        int count = 0;
+        double mean = 0;
+        double std_dev = 0;
+        for (const auto& val : ls_signal) {
+            if (val != 0) {
+                mean += val;
+                ++count;
+            }
+        }
+        mean /= count;
+        for (const auto& val : ls_signal) {
+            if (val != 0) {
+                std_dev += (mean - val) * (mean - val);
+            }
+        }
+        std_dev /= count;
+
+        std::cout << "ls_std_dev " << std_dev << std::endl;
+    }
     // loop variales
     EdgeID local_edges = 0;
     std::unordered_set<NodeID> neighbors {};      // don't know how to do faster? maybe using bitset from boost?
@@ -168,8 +183,6 @@ void ml_features::features(graph_access& G) {
     float avg_lcc = 0;
     float avg_wdeg = 0;
 
-    std::cout << "LOG: ml-features: starting filling matrix ..." << std::flush;
-    t.restart();
     forall_nodes(G, node){
         // num of nodes/ edges, deg
         getFeature<NODES>(node) = (float) G.number_of_nodes();
@@ -240,10 +253,6 @@ void ml_features::features(graph_access& G) {
 
         getFeature<CHI2_W_DEG>(node) = (float) chi2(getFeature<W_DEG>(node), avg_wdeg);
     } endfor
-
-    std::cout << "done"
-              << " (" << t.elapsed() <<  "s)"
-              << ".\n";
 
     current_size += G.number_of_nodes();
 }
