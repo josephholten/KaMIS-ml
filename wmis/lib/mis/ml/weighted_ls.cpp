@@ -109,7 +109,7 @@ void ls_perform_ils(const MISConfig& mis_config, graph_access& G, NodeWeight wei
             } endfor
 
     if (mis_config.console_log)
-        std::cout << "MIS_weight " << is_weight << std::endl;
+        std::cout << "ls_MIS_weight " << is_weight << std::endl;
 }
 
 void ls_assign_weights(graph_access& G, const MISConfig& mis_config) {
@@ -238,7 +238,7 @@ void weighted_ls::run_ils() {
             } endfor
 
             if (mis_config.console_log)
-                std::cout << "MIS_weight_check " << is_weight << std::endl;
+                std::cout << "ls_MIS_weight_check " << is_weight << std::endl;
         }
     } else {
         // run local search whithout reductions
