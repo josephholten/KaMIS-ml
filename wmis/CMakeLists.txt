@@ -175,11 +175,13 @@ add_library(libml ${ML_SOURCES})
 
 add_subdirectory(extern/xgboost)
 
-add_executable(branch_reduce "app/branch_reduce.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources>)
-target_link_libraries(branch_reduce)
+add_executable(branch_reduce "app/branch_reduce.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
+target_link_libraries(branch_reduce xgboost)
 add_executable(iterative_ml "app/iterative_ml.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
 target_link_libraries(iterative_ml xgboost)
-add_executable(weighted_ls "app/weighted_ls.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources>)
-add_executable(merge_graph_weights "app/merge_graph_weights.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources>)
+add_executable(weighted_ls "app/weighted_ls.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
+target_link_libraries(weighted_ls xgboost)
+add_executable(merge_graph_weights "app/merge_graph_weights.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
+target_link_libraries(merge_graph_weights xgboost)
 
 

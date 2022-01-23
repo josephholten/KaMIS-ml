@@ -36,9 +36,10 @@ models/*
 
 # Executable folders
 deploy
+build
 optimized
 cmake-*
 
 # IDE
 .idea
-*.swp
+.*.sw?

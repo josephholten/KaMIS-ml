@@ -9,7 +9,7 @@
 #include "algorithms/push_relabel.h"
 
 #include <utility>
-#include <safe_c_api.h>
+#include "safe_c_api.h"
 #include <ml_features.h>
 #include <numeric>
 

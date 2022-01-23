@@ -80,7 +80,7 @@ NodeWeight ls_perform_reduction(std::unique_ptr<branch_and_reduce_algorithm>& re
     ls_reverse_mapping = std::vector<NodeID>(G.number_of_nodes(), 0);
     reducer->build_graph_access(rG, ls_reverse_mapping);
 
-    if (!is_IS(rG)) {
+    if (!ls_is_IS(rG)) {
         std::cerr << "ERROR: reduced graph is not independent" << std::endl;
         exit(1);
     }
@@ -95,7 +95,7 @@ void ls_perform_ils(const MISConfig& mis_config, graph_access& G, NodeWeight wei
     ls_initial_is(G);
     local.perform_ils(G, 1000000, weight_offset);
 
-    if (!is_IS(G)) {
+    if (!ls_is_IS(G)) {
         std::cerr << "ERROR: graph after ILS is not independent" << std::endl;
         exit(1);
     }
