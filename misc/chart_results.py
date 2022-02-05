@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 def parse(name):
     if line.startswith(name + " "):
-        return line.removeprefix(name + " ")
+        return line[len(name + " "):]
     else:
         return None
 
@@ -20,7 +20,8 @@ test_number = "32"
 # evaluate tests
 with open("/home/jholten/KaMIS-ml/optima.txt") as optimum_file:
     split_lines = map(lambda line: line.split(" "), optimum_file.readlines())
-    optimum = dict(map(lambda l: (l[0].removeprefix("/home/jholten/test_graphs/"), int(l[1])), split_lines))
+    optimum = dict(map(lambda l: (l[0][len("/home/jholten/test_graphs/"):], int(l[1])), split_lines))
+    pprint(optimum)
 
 info = dict()
 
@@ -32,7 +33,7 @@ if not os.path.isfile(f"{output_directory}/{test_number}/info.json"):
             current_graph = ""
             for line in log_file:
                 if value := parse("graph"):
-                    current_graph = value
+                    current_graph = value.strip()
                     info[current_graph] = {}
                     current_info = info[current_graph]
 
@@ -62,7 +63,7 @@ else:
 
 pprint(info)
 names, values = zip(*sorted(info.items(), key=lambda tup: tup[0]))
-names = list(map(lambda s: s.removesuffix("-sorted.graph"), names))
+names = list(map(lambda s: s[:len("-sorted.graph")], names))
 plt.title("Ratios to optimum")
-plt.bar(names, map(lambda x: x["ratio"]))
+plt.bar(names, list(map(lambda x: x["ratio"], values)))
 plt.show()

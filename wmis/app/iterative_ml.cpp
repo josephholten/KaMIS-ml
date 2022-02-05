@@ -79,7 +79,7 @@ int main(int argn, char **argv) {
 
         mis_config.graph_filename = graph_filepath.substr(graph_filepath.find_last_of('/') + 1);
         if (mis_config.console_log)
-            std::cout << mis_config.graph_filename << std::endl;
+            std::cout << "graph " << mis_config.graph_filename << std::endl;
         mis_log::instance()->set_config(mis_config);
 
         // Read the graph

@@ -1,0 +1,10 @@
+/home/jholten/test_graphs/bcsstk31-sorted.graph 3485
+/home/jholten/test_graphs/brack2-sorted.graph 21174
+/home/jholten/test_graphs/buddha-sorted.graph 446353
+/home/jholten/test_graphs/fe_tooth-sorted.graph 27793
+/home/jholten/test_graphs/Ga3As3H12.mtx-sorted.graph 6057
+/home/jholten/test_graphs/great-britain-sorted.graph 3958619
+/home/jholten/test_graphs/in-2004-sorted.graph 896762
+/home/jholten/test_graphs/loc-gowalla_edges-sorted.graph 112369
+/home/jholten/test_graphs/ncvxqp5.mtx-sorted.graph 22491
+/home/jholten/test_graphs/pdb1HYS.mtx-sorted.graph 1014

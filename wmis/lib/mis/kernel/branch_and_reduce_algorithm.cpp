@@ -41,7 +41,11 @@ branch_and_reduce_algorithm::branch_and_reduce_algorithm(graph_access& G, const 
 		if (this->config.reduction_style == MISConfig::Reduction_Style::DENSE) {
 			status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, clique_neighborhood_reduction_fast>(status.n);
 		} else if (this->config.reduction_style == MISConfig::Reduction_Style::ML) {
-            status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, clique_neighborhood_reduction, critical_set_reduction, generalized_fold_reduction, ml_reduction>(status.n);
+			if (called_from_fold) {
+                status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, clique_neighborhood_reduction, critical_set_reduction>(status.n);
+            } else {
+                status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, clique_neighborhood_reduction, critical_set_reduction, generalized_fold_reduction, ml_reduction>(status.n);
+            }
         } else {
 			// MISConfig::Reduction_Style::NORMAL
 			if (called_from_fold) {

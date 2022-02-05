@@ -26,5 +26,7 @@ cp ./build/online_mis deploy/
 cp ./build/wmis/branch_reduce  deploy/weighted_branch_reduce
 #cp ./build/wmis/merge_graph_weights deploy/
 cp ./build/wmis/weighted_ls deploy/weighted_local_search
+cp ./build/wmis/iterative_ml deploy/iterative_ml
+cp ./build/wmis/train_model deploy/train_model
 
 rm -rf build
