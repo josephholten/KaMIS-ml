@@ -26,7 +26,7 @@ public:
     inline size_t getRows() const { return rows; };
     inline size_t getCols() const { return cols; };
 
-    inline float* c_arr() { return &data[0]; };
+    inline float* c_arr() { return data.data(); };
 
 private:
     size_t cols {};

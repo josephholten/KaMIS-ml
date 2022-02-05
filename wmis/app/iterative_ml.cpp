@@ -64,7 +64,6 @@ void assign_weights(graph_access& G, const MISConfig& mis_config) {
 
 int main(int argn, char **argv) {
         mis_log::instance()->restart_total_timer();
-        //mis_log::instance()->print_title();
 
         MISConfig mis_config;
         std::string graph_filepath;
@@ -79,6 +78,8 @@ int main(int argn, char **argv) {
         mis_config.reduction_style = MISConfig::ML;
 
         mis_config.graph_filename = graph_filepath.substr(graph_filepath.find_last_of('/') + 1);
+        if (mis_config.console_log)
+            std::cout << mis_config.graph_filename << std::endl;
         mis_log::instance()->set_config(mis_config);
 
         // Read the graph
@@ -122,6 +123,8 @@ int main(int argn, char **argv) {
         }
 
         if (mis_config.write_graph) graph_io::writeIndependentSet(G, mis_config.output_filename);
+
+        std::cout << std::endl;
 
         return 0;
 }
