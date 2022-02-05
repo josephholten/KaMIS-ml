@@ -58,6 +58,8 @@ struct MISConfig {
     bool ls_updates;
     // How aggresively to prune vertices based on the ML prediction
     float ml_pruning;
+    // Where to load/ save the model
+    std::string model;
 
 
     void setReductionStyle(const std::string & redu_style) {

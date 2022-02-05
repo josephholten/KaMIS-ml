@@ -35,6 +35,8 @@ if(COMPILER_SUPPORTS_FUNROLL_LOOPS)
   add_definitions(-funroll-loops)
 endif()
 
+add_compile_definitions(MODEL_DIR="${CMAKE_SOURCE_DIR}/models")
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/app)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/extern/argtable3-3.0.3)
@@ -171,17 +173,21 @@ set(ML_SOURCES
         lib/mis/ml/weighted_ls.cpp
 )
 
-add_library(libml ${ML_SOURCES})
+add_library(libml OBJECT ${ML_SOURCES})
 
 add_subdirectory(extern/xgboost)
 
 add_executable(branch_reduce "app/branch_reduce.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
 target_link_libraries(branch_reduce xgboost)
-add_executable(iterative_ml "app/iterative_ml.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
-target_link_libraries(iterative_ml xgboost)
+
 add_executable(weighted_ls "app/weighted_ls.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
 target_link_libraries(weighted_ls xgboost)
+
 add_executable(merge_graph_weights "app/merge_graph_weights.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
 target_link_libraries(merge_graph_weights xgboost)
 
+add_executable(train_model "app/train_model.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
+target_link_libraries(train_model xgboost)
 
+add_executable(iterative_ml "app/iterative_ml.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
+target_link_libraries(iterative_ml xgboost)

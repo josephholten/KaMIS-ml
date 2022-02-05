@@ -255,22 +255,14 @@ struct ml_reduction : public general_reduction {
     virtual ml_reduction* clone() const final { return new ml_reduction(*this); }
 
     virtual reduction_type get_reduction_type() const final { return reduction_type::ml; }
+    void load_model(const std::string &model);
     virtual bool reduce(branch_and_reduce_algorithm* br_alg) final;
     virtual void restore(branch_and_reduce_algorithm* br_alg) final;
     virtual void apply(branch_and_reduce_algorithm* br_alg) final;
 
 private:
     BoosterHandle booster;
-    // float q = 0.95;
-
-    // struct restore_data {
-    //     // get IS_status::included and hidden (isolated)
-    //     std::vector<NodeID> likely;
-    //     // get IS_status::excluded
-    //     std::vector<NodeID> unlikely;
-    // };
-
-    // std::vector<restore_data> restore_vec;
+    bool booster_model_loaded = false;
 };
 
 

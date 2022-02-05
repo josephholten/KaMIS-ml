@@ -44,7 +44,7 @@ inline void configuration_mis::standard( MISConfig & mis_config ) {
 	mis_config.sort_freenodes                         = true;
     // Reductions
 	mis_config.perform_reductions                     = true;
-    mis_config.reduction_style                         = MISConfig::Reduction_Style::NORMAL;
+    mis_config.reduction_style                        = MISConfig::Reduction_Style::NORMAL;
     // Weights
     mis_config.weight_source                          = MISConfig::Weight_Source::FILE;
     // ML
@@ -52,6 +52,7 @@ inline void configuration_mis::standard( MISConfig & mis_config ) {
     mis_config.ls_time                                = 5;
     mis_config.ls_updates                             = false;
     mis_config.ml_pruning                             = 0.95;
+    mis_config.model                                  = MODEL_DIR "/standard.model";
 }
 
 #endif

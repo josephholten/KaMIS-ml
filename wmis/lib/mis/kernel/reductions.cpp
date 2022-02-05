@@ -1091,9 +1091,12 @@ ml_reduction::ml_reduction(size_t n) : general_reduction(n) {
     safe_xgboost(XGBoosterCreate(nullptr, 0, &booster));
     safe_xgboost(XGBoosterSetParam(booster, "eta", "1"));
     safe_xgboost(XGBoosterSetParam(booster, "nthread", "16"));
+}
 
-    safe_xgboost(XGBoosterLoadModel(booster, "../../models/standard.model"));
+void ml_reduction::load_model(const std::string &model) {
+    safe_xgboost(XGBoosterLoadModel(booster, model.c_str()));
 
+    // check if loaded model is compatible with current compiled ml_features
     bst_ulong num_of_features;
     safe_xgboost(XGBoosterGetNumFeature(booster, &num_of_features));
     assert(num_of_features == ml_features::FEATURE_NUM);
@@ -1101,8 +1104,15 @@ ml_reduction::ml_reduction(size_t n) : general_reduction(n) {
 
 bool ml_reduction::reduce(branch_and_reduce_algorithm* br_alg) {
     auto &status = br_alg->status;
+    auto &config = br_alg->config;
     if (status.remaining_nodes <= 1)
         return false;
+
+    // init model on first reduction run
+    if (!booster_model_loaded) {
+        load_model(br_alg->config.model);
+        booster_model_loaded = true;
+    }
 
     if (br_alg->config.console_log) {
         std::cout << "-------------------------------------" << std::endl;
@@ -1139,8 +1149,8 @@ bool ml_reduction::reduce(branch_and_reduce_algorithm* br_alg) {
               [&prediction](const NodeID& n1, const NodeID& n2){ return prediction[n1] < prediction[n2]; }
     );
 
-    // include upper 5% of nodes
-    for(size_t index = 0; index < std::ceil(high_candidates.size()*0.05); ++index) {
+    // include upper q% of nodes
+    for(size_t index = 0; index < std::ceil(high_candidates.size()*(1-config.ml_pruning)); ++index) {
         auto node = high_candidates[index];
         if (status.node_status[reverse_mapping[node]] == IS_status::not_set) {
             // force high confidence nodes into IS
@@ -1155,8 +1165,8 @@ bool ml_reduction::reduce(branch_and_reduce_algorithm* br_alg) {
         }
     }
 
-    // remove lower 5% nodes
-    for(size_t index = std::floor(high_candidates.size()*0.95); index < high_candidates.size(); ++index) {
+    // remove lower (1-q)% nodes
+    for(size_t index = std::floor(high_candidates.size()*(config.ml_pruning)); index < high_candidates.size(); ++index) {
         auto node = high_candidates[index];
         if (status.node_status[reverse_mapping[node]] == IS_status::not_set) {
             br_alg->set(reverse_mapping[node], IS_status::excluded);

@@ -23,8 +23,8 @@ public:
 
     inline std::vector<float>::iterator operator[](size_t idx) { return data.begin() + idx*cols; };
 
-    inline size_t getRows() { return rows; };
-    inline size_t getCols() { return cols; };
+    inline size_t getRows() const { return rows; };
+    inline size_t getCols() const { return cols; };
 
     inline float* c_arr() { return &data[0]; };
 
@@ -45,8 +45,8 @@ public:
     ~ml_features();
 
     [[nodiscard]] static int getNumberOfFeatures() ;
-    size_t getRows() { return feature_matrix.getRows(); };
-    size_t getCols() { return feature_matrix.getCols(); };
+    [[nodiscard]] size_t getRows() const { return feature_matrix.getRows(); };
+    [[nodiscard]] size_t getCols() const { return feature_matrix.getCols(); };
 
     void fromPaths(const std::vector<std::string> &graphs, const std::vector<std::string> &labels);
 

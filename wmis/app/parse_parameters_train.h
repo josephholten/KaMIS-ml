@@ -21,7 +21,7 @@
  *
  * @return -1 if there was an error. 0 otherwise.
  */
-int parse_parameters_ml(int argn, char **argv,
+int parse_parameters_train(int argn, char **argv,
                      MISConfig & mis_config,
                      std::string & graph_filename) {
     const char *progname = argv[0];
@@ -29,28 +29,21 @@ int parse_parameters_ml(int argn, char **argv,
     // Setup the argtable structs
     struct arg_lit *help                = arg_lit0(NULL, "help", "Print help.");
     struct arg_int *user_seed           = arg_int0(NULL, "seed", NULL, "Seed to use for the PRNG.");
-    struct arg_str *filename            = arg_strn(NULL, NULL, "FILE", 1, 1, "Path to graph file.");
-    struct arg_str *output              = arg_str0(NULL, "output", NULL, "Path to store resulting independent set.");
     struct arg_dbl *time_limit          = arg_dbl0(NULL, "time_limit", NULL, "Time limit in s. Default 1000s.");
     struct arg_lit *console_log         = arg_lit0(NULL, "console_log", "Stream the log into the console");
     struct arg_lit *disable_checks      = arg_lit0(NULL, "disable_checks", "Disable sortedness check during I/O.");
-	struct arg_lit *random_freenodes    = arg_lit0(NULL, "random_freenodes", "Randomly picks free nodes to maximize to IS instead of sorting them by weight.");
-	struct arg_lit *disable_reduction   = arg_lit0(NULL, "disable_reduction", "Don't perforn any reductions.");
     struct arg_str *weight_source       = arg_str0(NULL, "weight_source", NULL, "Choose how the weights are assigned. Can be either: file (default), hybrid, uniform, geometric.");
     struct arg_str *reduction_style     = arg_str0(NULL, "reduction_style", NULL, "Choose the type of reductions appropriate for the input graph. Can be either: normal/sparse (default), dense/osm.");
     struct arg_int *ls_rounds           = arg_int0(NULL, "ls_rounds", NULL, "Number of local search signals to compute for ML reductions");
     struct arg_dbl *ls_time             = arg_dbl0(NULL, "ls_time", NULL, "Time limit for local search signals in ML reductions");
     struct arg_lit *ls_updates          = arg_lit0(NULL, "ls_updates", "Print updates in local search signal in ML reductions");
-    struct arg_dbl *ml_pruning          = arg_dbl0(NULL, "ml_pruning", NULL, "How aggresively to prune vertices based on the ML prediction");
-    struct arg_str *model               = arg_str0(NULL, "model", NULL, "Where to load/ save the model");
+    struct arg_str *model               = arg_str0(NULL, "model", NULL, "Where to save the model");
 
     struct arg_end *end                 = arg_end(100);
 
     // Setup the argtable
     void *argtable[] = {
             help,
-            filename,
-            output,
             user_seed,
             time_limit,
             console_log,
@@ -62,7 +55,6 @@ int parse_parameters_ml(int argn, char **argv,
             ls_rounds,
             ls_time,
             ls_updates,
-            ml_pruning,
             model,
             end
     };
@@ -89,10 +81,6 @@ int parse_parameters_ml(int argn, char **argv,
         return 1;
     }
 
-    if (filename->count > 0) {
-        graph_filename = filename->sval[0];
-    }
-
     if (user_seed->count > 0) {
         mis_config.seed = user_seed->ival[0];
     }
@@ -112,14 +100,6 @@ int parse_parameters_ml(int argn, char **argv,
         mis_config.check_sorted = false;
     }
 
-	if (random_freenodes->count > 0) {
-		mis_config.sort_freenodes = false;
-	}
-
-	if (disable_reduction->count > 0) {
-		mis_config.perform_reductions = false;
-	}
-
 	if (weight_source->count > 0) {
 		mis_config.setWeightSource(weight_source->sval[0]);
 	}
@@ -127,13 +107,6 @@ int parse_parameters_ml(int argn, char **argv,
 	if (reduction_style->count > 0) {
 		mis_config.setReductionStyle(reduction_style->sval[0]);
 	}
-
-    if (output->count > 0) {
-        mis_config.output_filename = output->sval[0];
-        mis_config.write_graph = true;
-    } else {
-        mis_config.write_graph = false;
-    }
 
     if (ls_rounds->count > 0) {
         mis_config.ls_rounds = ls_rounds->ival[0];
@@ -145,10 +118,6 @@ int parse_parameters_ml(int argn, char **argv,
 
     if (ls_updates->count > 0) {
         mis_config.ls_updates = true;
-    }
-
-    if (ml_pruning->count > 0) {
-        mis_config.ml_pruning = (float) ml_pruning->dval[0];
     }
 
     if (model->count > 0) {

@@ -141,8 +141,6 @@ void ml_features::features(graph_access& G) {
     // local search
     std::vector<int> ls_signal(G.number_of_nodes(), 0);
     std::random_device rd;
-    // int seed = rd();
-    // mis_config.seed = seed;
 
     for (int round = 0; round < mis_config.ls_rounds; ++round) {
         // TODO: only reduce the graph once, then perform the LS rounds with different seeds
@@ -153,7 +151,6 @@ void ml_features::features(graph_access& G) {
         forall_nodes(G, node) {
             ls_signal[node] += (int) G.getPartitionIndex(node);
         } endfor
-        // TODO: normalize ls_signal (-> retrain model)
     }
 
     if (mis_config.console_log) {
