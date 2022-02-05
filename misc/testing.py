@@ -5,10 +5,6 @@ from multiprocessing import Pool
 
 import numpy as np
 
-graph_directory = "/home/jholten/test_graphs"
-output_directory = "/home/jholten/perf_tests_kamis_ml"
-dir_permissions = 0o774
-executable = "/home/jholten/KaMIS-ml/deploy/iterative_ml"
 
 
 class Config:
@@ -39,14 +35,7 @@ def exec_iterative_ml(config, graph_filename, test_number):
     print(args)
 
 
-# check if output_dir exists (if not make it)
-if not os.path.exists(output_directory):
-    os.mkdir(output_directory, dir_permissions)
 
-# make new folder for tests of current iteration
-test_number = str(len(list(os.listdir(output_directory))))
-os.mkdir(os.path.join(output_directory, test_number), dir_permissions)
-print(f"test #{test_number}")
 
 # run tests
 with Pool(processes=os.cpu_count()) as pool:
@@ -54,23 +43,4 @@ with Pool(processes=os.cpu_count()) as pool:
         graph_filepath = os.path.join(graph_directory, graph_filename)
         if os.path.isfile(graph_filepath):
             pool.apply_async(exec_iterative_ml, (Config(), graph_filename, test_number))
-
-# evaluate tests
-with open("/home/jholten/mis/kamis_results/optimum.json") as optimum_file:
-    optimum = json.load(optimum_file)
-
-ratio = {}
-for output_filename in os.listdir(f"{output_directory}/{test_number}"):
-    if output_filename.endswith(".log"):
-        output_filepath = os.path.join(output_directory, output_filename)
-        with open(output_filepath) as output_file:
-            line = filter(lambda s: s.startswith("MIS_weight"), output_file.readlines())
-            weight = line.split(" ")[1]
-            graph = output_filename[:output_filename.find(".")]
-            ratio[graph] = weight / optimum[graph]
-
-print(ratio)
-
-
-
 
