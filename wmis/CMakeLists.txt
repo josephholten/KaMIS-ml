@@ -191,3 +191,6 @@ target_link_libraries(train_model xgboost)
 
 add_executable(iterative_ml "app/iterative_ml.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
 target_link_libraries(iterative_ml xgboost)
+
+add_executable(analyze "app/analyze.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
+target_link_libraries(analyze xgboost)

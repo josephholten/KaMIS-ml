@@ -8,11 +8,12 @@ TEST_NAME=ls_rounds_test
 
 # get current test number
 test=0
-for i in $(ls $OUTPUT_DIR); do
+for i in $OUTPUT_DIR/*; do
+    i=$(basename $i)
     (( i > test )) && test=$i
 done
 
-let "test++"
+(( test++ ))
 echo "Running test $TEST_NAME (#$test)"
 
 mkdir $OUTPUT_DIR/$test
