@@ -166,7 +166,7 @@ int graph_io::readGraphWeighted(graph_access & G, const std::string & filename) 
                         if( total_nodeweight > (long long) std::numeric_limits<NodeWeight>::max()) {
                                 std::cerr <<  "The sum of the node weights is too large (it exceeds the node weight type)."  << std::endl;
                                 std::cerr <<  "Currently not supported. Please scale your node weights."  << std::endl;
-                                exit(0);
+                                exit(2);
                         }
                 }
                 G.setNodeWeight(node, weight);
