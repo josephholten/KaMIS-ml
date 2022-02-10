@@ -49,9 +49,11 @@ int main(int argn, char** argv) {
 
     train_features.fromPaths(read_lines(train_graphs_path),
                              read_lines(train_labels_path));
+    train_features.regularize();
     std::cout << "LOG: ml-train: getting feature matrices for testing\n";
     test_features.fromPaths(read_lines(test_graph_path),
                             read_lines(test_label_path));
+    test_features.regularize();
 
     // initialize DMatrices in with feature and label data
     train_features.initDMatrix();

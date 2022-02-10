@@ -263,6 +263,62 @@ DMatrixHandle ml_features::getDMatrix() {
     return dmat;
 }
 
+/*
+ * For nodes from different graphs with equal features, average over the labels
+ * to avoid conflicting information for the booster.
+ */
+void ml_features::regularize() {
+    // pointers to rows
+    std::vector<float *> rows(feature_matrix.getRows());
+    float *current_row = feature_matrix.c_arr();
+    for (float*& row: rows) {
+        row = current_row;
+        current_row += FEATURE_NUM;
+    }
 
+    // sort the rows by columns consecutively,
+    // consecutive rows will then be approx equal
+    std::sort(rows.begin(), rows.end(), [](const float *row1, const float *row2) {
+        size_t col = 0;
+        while (float_approx_eq(row1[col], row2[col]) && col < FEATURE_NUM - 1)
+            ++col;
+        return row1[col] < row2[col];
+    });
 
+    // find all rows which are the same
+    matrix regularized_feature_matrix(feature_matrix.getCols());
+    std::vector<float> regularized_label_data;
+    {
+        auto row = rows.begin();
+        float label_sum = label_data.front();
+        for (auto next = row + 1; next != rows.end(); next++) {
+            size_t col = 0;
+            while (float_approx_eq((*row)[col], (*next)[col]) && col < FEATURE_NUM)
+                ++col;
 
+            auto next_label = label_data[next - rows.begin()];
+            // if row and equal are not equal until the last column (last feature)
+            if (col != FEATURE_NUM) {
+                // copy the row (only one of the equal rows)
+                regularized_feature_matrix.addRows(*row, 1);
+                regularized_label_data.push_back(label_sum / (float) (next-row));
+                // advance row to next
+                row = next;
+                // reset label_sum to only the label of the current row
+                label_sum = next_label;
+            }
+            // if row and next are approx equal
+            else {
+                label_sum += next_label;
+            }
+        }
+    }
+
+    // update feature_matrix and label_data to the new regularized data
+    feature_matrix = std::move(regularized_feature_matrix);
+    label_data     = std::move(regularized_label_data);
+}
+
+bool ml_features::float_approx_eq(float a, float b) {
+    return std::abs(a-b) < eps;
+}

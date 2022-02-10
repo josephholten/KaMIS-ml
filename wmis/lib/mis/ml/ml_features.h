@@ -15,16 +15,26 @@ class matrix {
 public:
     // TODO: add row reserving constructor
     explicit matrix(size_t _cols) : cols {_cols} {};
+    matrix& operator=(matrix&& other)  noexcept {
+        data = std::move(other.data);
+        return *this;
+    }
 
     inline void addRows(size_t _rows) {
         rows += _rows;
         data.resize(data.size() + rows*cols);
     }
 
+    inline void addRows(float* start, size_t _rows) {
+        rows += _rows;
+        data.reserve(data.size() + rows*cols);
+        std::copy(start, start+_rows*cols, std::back_inserter(data));
+    }
+
     inline std::vector<float>::iterator operator[](size_t idx) { return data.begin() + idx*cols; };
 
-    inline size_t getRows() const { return rows; };
-    inline size_t getCols() const { return cols; };
+    [[nodiscard]] inline size_t getRows() const { return rows; };
+    [[nodiscard]] inline size_t getCols() const { return cols; };
 
     inline float* c_arr() { return data.data(); };
 
@@ -49,6 +59,7 @@ public:
     [[nodiscard]] size_t getCols() const { return feature_matrix.getCols(); };
 
     void fromPaths(const std::vector<std::string> &graphs, const std::vector<std::string> &labels);
+    static bool float_approx_eq(float a, float b);
 
     void reserveNodes(NodeID n);   // for reserving memory
     void fillGraph(graph_access& G);
@@ -57,10 +68,13 @@ public:
     void initDMatrix();
     DMatrixHandle getDMatrix();
 
+    void regularize();
 
 private:
     enum feature : int { NODES=0, EDGES=1, DEG=2, CHI2_DEG=3, AVG_CHI2_DEG=4, LCC=5, CHI2_LCC=6, CHROMATIC=7, T_WEIGHT=8, NODE_W=9, W_DEG=10, CHI2_W_DEG=11, LOCAL_SEARCH=12, FEATURE_NUM_ENUM };
     static_assert(ml_features::FEATURE_NUM == FEATURE_NUM_ENUM, "assure ml_features::FEATURE_NUM is correct");
+
+    static constexpr float eps = 1e-4;
 
     MISConfig mis_config;
     size_t current_size {0};
