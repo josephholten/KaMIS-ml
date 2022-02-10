@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
         }
 
 
-        std::cout << "Checkingc IS: " << argv[3] << std::endl;
+        std::cout << "Checking IS: " << argv[3] << std::endl;
         bool IS = is_IS(G);
 
         std::cout << "Independent set check: " << (IS ? "passed" : "failed") << std::endl;

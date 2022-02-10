@@ -48,10 +48,10 @@ inline void configuration_mis::standard( MISConfig & mis_config ) {
     // Weights
     mis_config.weight_source                          = MISConfig::Weight_Source::FILE;
     // ML
-    mis_config.ls_rounds                              = 5;
-    mis_config.ls_time                                = 5;
+    mis_config.ls_rounds                              = 2;
+    mis_config.ls_time                                = 2;
     mis_config.ls_updates                             = false;
-    mis_config.ml_pruning                             = 0.95;
+    mis_config.ml_pruning                             = 0.97;
     mis_config.model                                  = MODEL_DIR "/standard.model";
 }
 
