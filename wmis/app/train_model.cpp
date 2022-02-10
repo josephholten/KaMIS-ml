@@ -71,13 +71,20 @@ int main(int argn, char** argv) {
     safe_xgboost(XGBoosterSetParam(booster, "objective", "binary:logistic"));
     safe_xgboost(XGBoosterSetParam(booster, "eval_metric", "logloss"));
 
-    safe_xgboost(XGBoosterSetParam(booster, "gamma", "0.1"));
-    safe_xgboost(XGBoosterSetParam(booster, "max_depth", "3"));
-    safe_xgboost(XGBoosterSetParam(booster, "eta", "1"));
+    safe_xgboost(XGBoosterSetParam(booster, "gamma", "0.01"));
+    safe_xgboost(XGBoosterSetParam(booster, "max_depth", "5"));
+    safe_xgboost(XGBoosterSetParam(booster, "eta", "0.3"));
     safe_xgboost(XGBoosterSetParam(booster, "verbosity", "1"));
+    safe_xgboost(XGBoosterSetParam(booster, "subsample", "0.5"));
+
+    float scale = train_features.scale_pos_weight_param();
+    std::stringstream ss;
+    ss << scale;
+    std::cout << "scale_pos_weight " << scale;
+    safe_xgboost(XGBoosterSetParam(booster, "scale_pos_weight", ss.str().c_str()));
 
     std::cout << "LOG: ml-train: starting training\n";
-    int n_trees = 10;
+    int n_trees = 30;
     const char *eval_names[2] = {"train", "test"};
     const char *eval_result = nullptr;
 

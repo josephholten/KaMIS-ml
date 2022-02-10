@@ -57,7 +57,7 @@ void ml_features::fromPaths(const std::vector<std::string> &all_graph_paths, con
             label_paths.push_back(all_label_paths[i]);
         }
     }
-    std::cout << "LOG: ml-calcFeatures: " << all_graph_paths.size() << " of " << graph_paths.size() << " were non empty\n";
+    std::cout << "LOG: ml-calcFeatures: " << graph_paths.size() << " of " << all_graph_paths.size() << " were non empty\n";
 
     // calculate the node offsets of each graph
     // produces a mapping of index in the list of paths (provided by the user) and the start position in the feature_matrix and label_data
@@ -319,4 +319,17 @@ void ml_features::regularize() {
 
 bool ml_features::float_approx_eq(float a, float b) {
     return std::abs(a-b) < eps;
+}
+
+float ml_features::scale_pos_weight_param() const {
+    size_t number_of_positive = 0;
+    size_t number_of_negative = 0;
+    for (const auto label : label_data) {
+        if (label == 0)
+            ++number_of_negative;
+        if (label == 1)
+            ++number_of_positive;
+    }
+
+    return (float) number_of_negative / (float) number_of_positive;
 }

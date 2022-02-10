@@ -32,6 +32,8 @@ public:
     void initDMatrix();
     DMatrixHandle getDMatrix();
 
+    [[nodiscard]] float scale_pos_weight_param() const;
+
     void regularize();
 
 private:
