@@ -18,7 +18,7 @@ std::vector<std::string> read_lines(const std::string& path) {
     }
     std::string line;
     while (std::getline(ifstream, line)) {
-        if (line[0] == '#')
+        if (line[0] == '#' or line.empty())
             continue;
         lines.push_back(line);
     }
@@ -104,7 +104,5 @@ int main(int argn, char** argv) {
     safe_xgboost(XGBoosterSaveModel(booster, mis_config.model.c_str() ));
     safe_xgboost(XGBoosterSaveModel(booster, time_stamp_name));
 
-    XGDMatrixFree(eval_dmats[0]);
-    XGDMatrixFree(eval_dmats[1]);
-    XGBoosterFree(booster);
+    safe_xgboost(XGBoosterFree(booster));  // this also frees the eval_dmats (?)
 }

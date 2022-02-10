@@ -17,7 +17,7 @@
 // constructors
 // for training (many graphs with labels)
 ml_features::ml_features(const MISConfig& config)
-    : feature_matrix(FEATURE_NUM), has_labels {true}
+    : has_labels {true}
 {
     configuration_mis cfg;
     cfg.standard(mis_config);
@@ -29,7 +29,7 @@ ml_features::ml_features(const MISConfig& config)
 
 // for reducing (single graph without labels)
 ml_features::ml_features(const MISConfig& config, graph_access &G)
-    : feature_matrix(FEATURE_NUM), has_labels {false}
+    : has_labels {false}
 {
     configuration_mis cfg;
     cfg.standard(mis_config);
@@ -57,7 +57,7 @@ void ml_features::fromPaths(const std::vector<std::string> &all_graph_paths, con
             label_paths.push_back(all_label_paths[i]);
         }
     }
-    std::cout << "LOG: ml-calcFeatures: of " << all_graph_paths.size() << " " << graph_paths.size() << " were non empty\n";
+    std::cout << "LOG: ml-calcFeatures: " << all_graph_paths.size() << " of " << graph_paths.size() << " were non empty\n";
 
     // calculate the node offsets of each graph
     // produces a mapping of index in the list of paths (provided by the user) and the start position in the feature_matrix and label_data
@@ -268,12 +268,8 @@ DMatrixHandle ml_features::getDMatrix() {
  */
 void ml_features::regularize() {
     // iterators to rows
-    std::vector<matrix::const_iterator> rows(getRows());
-    {
-        auto current_row = feature_matrix.cbegin();
-        for (auto& row: rows)
-            row = current_row++;
-    }
+    std::vector<matrix::iterator> rows(getRows());
+    std::iota(rows.begin(), rows.end(), feature_matrix.begin());
 
     // sort the rows by columns consecutively,
     // consecutive rows will then be approx equal
@@ -295,7 +291,7 @@ void ml_features::regularize() {
             while (float_approx_eq((**row)[col], (**next)[col]) && col < FEATURE_NUM)
                 ++col;
 
-            auto next_label = label_data[next - rows.begin()];
+            auto next_label = label_data[*next - feature_matrix.begin()];
             // if row and equal are not equal until the last column (last feature)
             if (col < FEATURE_NUM) {
                 // copy the row
@@ -312,6 +308,8 @@ void ml_features::regularize() {
             }
         }
     }
+
+    std::cout << "regularization: removed " << (float) (feature_matrix.size() - regularized_feature_matrix.size()) / feature_matrix.size() << "%" << std::endl;
 
     // update feature_matrix and label_data to the new regularized data
     feature_matrix = std::move(regularized_feature_matrix);
