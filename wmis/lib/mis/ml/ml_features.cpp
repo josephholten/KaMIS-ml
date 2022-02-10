@@ -46,11 +46,6 @@ ml_features::~ml_features() {
     XGDMatrixFree(dmat);
 }
 
-// getters
-int ml_features::getNumberOfFeatures() {
-    return FEATURE_NUM;
-}
-
 void ml_features::fromPaths(const std::vector<std::string> &all_graph_paths, const std::vector<std::string>& all_label_paths) {
     assert((all_graph_paths.size() == all_label_paths.size()) && "Error: provide same number of graph and label paths\n");
 
@@ -62,7 +57,7 @@ void ml_features::fromPaths(const std::vector<std::string> &all_graph_paths, con
             label_paths.push_back(all_label_paths[i]);
         }
     }
-    std::cout << "LOG: ml-features: of " << all_graph_paths.size() << " " << graph_paths.size() << " were non empty\n";
+    std::cout << "LOG: ml-calcFeatures: of " << all_graph_paths.size() << " " << graph_paths.size() << " were non empty\n";
 
     // calculate the node offsets of each graph
     // produces a mapping of index in the list of paths (provided by the user) and the start position in the feature_matrix and label_data
@@ -77,7 +72,7 @@ void ml_features::fromPaths(const std::vector<std::string> &all_graph_paths, con
     // #pragma omp parallel for default(none) shared(graph_paths, label_paths, offsets, std::cout)
     for (int i = 0; i < graph_paths.size(); ++i) {
         // std::cout << "Thread " << omp_get_thread_num() << std::endl;
-        std::cout << "LOG: ml-features: graph " << graph_paths[i] << " (" << (float) i / graph_paths.size() * 100 << "%)\n";
+        std::cout << "LOG: ml-calcFeatures: graph " << graph_paths[i] << " (" << (float) i / graph_paths.size() * 100 << "%)\n";
         graph_access G;
         graph_io::readGraphWeighted(G, graph_paths[i]);
         std::vector<float> labels(G.number_of_nodes(), 0);
@@ -89,7 +84,7 @@ void ml_features::fromPaths(const std::vector<std::string> &all_graph_paths, con
 
 // init
 void ml_features::reserveNodes(NodeID n) {
-    feature_matrix.addRows(n);
+    feature_matrix.resize(feature_matrix.size() + n);
     label_data.resize(label_data.size() + n);
 }
 
@@ -98,14 +93,14 @@ void ml_features::fillGraph(graph_access& G) {
         std::cerr << "Error: feature matrix was constructed for labels, so provide the labels for the graph.\n";
         exit(1);
     }
-    features(G);
+    calcFeatures(G);
 }
 
 void ml_features::fillGraph(graph_access& G, std::vector<float>& labels, NodeID offset) {
     if (!has_labels) {
         std::cerr << "Error: feature matrix was constructed not for labels, so the labels will be discarded.\n";
     }
-    features(G);
+    calcFeatures(G);
     std::copy(labels.begin(), labels.end(), label_data.begin() + offset);
 }
 
@@ -116,7 +111,7 @@ float& ml_features::getFeature(NodeID node) {
     return feature_matrix[node + current_size][f];
 }
 
-void ml_features::features(graph_access& G) {
+void ml_features::calcFeatures(graph_access& G) {
     // timer t;
 
     NodeWeight total_weight = 0;
@@ -255,7 +250,11 @@ void ml_features::features(graph_access& G) {
 }
 
 void ml_features::initDMatrix() {
-    XGDMatrixCreateFromMat(feature_matrix.c_arr(), feature_matrix.getRows(), feature_matrix.getCols(), 0, &dmat);
+    if (feature_matrix.empty()) {
+        std::cerr << "feature matrix empty, cannot create DMatrix from it!" << std::endl;
+        return;
+    }
+    XGDMatrixCreateFromMat(c_arr(feature_matrix), getRows(), getCols(), 0, &dmat);
     XGDMatrixSetFloatInfo(dmat, "label", &label_data[0], label_data.size());
 }
 
@@ -268,39 +267,39 @@ DMatrixHandle ml_features::getDMatrix() {
  * to avoid conflicting information for the booster.
  */
 void ml_features::regularize() {
-    // pointers to rows
-    std::vector<float *> rows(feature_matrix.getRows());
-    float *current_row = feature_matrix.c_arr();
-    for (float*& row: rows) {
-        row = current_row;
-        current_row += FEATURE_NUM;
+    // iterators to rows
+    std::vector<matrix::const_iterator> rows(getRows());
+    {
+        auto current_row = feature_matrix.cbegin();
+        for (auto& row: rows)
+            row = current_row++;
     }
 
     // sort the rows by columns consecutively,
     // consecutive rows will then be approx equal
-    std::sort(rows.begin(), rows.end(), [](const float *row1, const float *row2) {
+    std::sort(rows.begin(), rows.end(), [](auto row1, auto row2) {
         size_t col = 0;
-        while (float_approx_eq(row1[col], row2[col]) && col < FEATURE_NUM - 1)
+        while (float_approx_eq((*row1)[col], (*row2)[col]) && col < FEATURE_NUM - 1)
             ++col;
         return row1[col] < row2[col];
     });
 
     // find all rows which are the same
-    matrix regularized_feature_matrix(feature_matrix.getCols());
+    matrix regularized_feature_matrix;
     std::vector<float> regularized_label_data;
     {
         auto row = rows.begin();
         float label_sum = label_data.front();
         for (auto next = row + 1; next != rows.end(); next++) {
             size_t col = 0;
-            while (float_approx_eq((*row)[col], (*next)[col]) && col < FEATURE_NUM)
+            while (float_approx_eq((**row)[col], (**next)[col]) && col < FEATURE_NUM)
                 ++col;
 
             auto next_label = label_data[next - rows.begin()];
             // if row and equal are not equal until the last column (last feature)
-            if (col != FEATURE_NUM) {
-                // copy the row (only one of the equal rows)
-                regularized_feature_matrix.addRows(*row, 1);
+            if (col < FEATURE_NUM) {
+                // copy the row
+                regularized_feature_matrix.push_back(**row);
                 regularized_label_data.push_back(label_sum / (float) (next-row));
                 // advance row to next
                 row = next;
@@ -316,6 +315,7 @@ void ml_features::regularize() {
 
     // update feature_matrix and label_data to the new regularized data
     feature_matrix = std::move(regularized_feature_matrix);
+    current_size   = feature_matrix.size();
     label_data     = std::move(regularized_label_data);
 }
 

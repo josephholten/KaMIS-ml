@@ -1,9 +1,9 @@
 /home/jholten/mis/kamis_results/4elt-sorted.graph.kernel.mis
-/home/jholten/mis/kamis_results/598a-sorted.graph.kernel.mis
-/home/jholten/mis/kamis_results/amazon-2008-sorted.graph.kernel.mis
-#/home/jholten/mis/kamis_results/as-skitter-sorted.graph.kernel.mis
+#/home/jholten/mis/kamis_results/598a-sorted.graph.kernel.mis
+#/home/jholten/mis/kamis_results/amazon-2008-sorted.graph.kernel.mis
+/home/jholten/mis/kamis_results/as-skitter-sorted.graph.kernel.mis
 #/home/jholten/mis/kamis_results/auto-sorted.graph.kernel.mis
-#/home/jholten/mis/kamis_results/bcsstk30-sorted.graph.kernel.mis
+/home/jholten/mis/kamis_results/bcsstk30-sorted.graph.kernel.mis
 #/home/jholten/mis/kamis_results/beethoven-sorted.graph.kernel.mis
 #/home/jholten/mis/kamis_results/blob-sorted.graph.kernel.mis
 #/home/jholten/mis/kamis_results/blockqp1.mtx-sorted.graph.kernel.mis

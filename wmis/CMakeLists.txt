@@ -8,6 +8,7 @@ endif (NOT CMAKE_BUILD_TYPE)
 set(CMAKE_CXX_STANDARD 17)
 
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
+    message(Debug build)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -fPIC")
 endif(CMAKE_BUILD_TYPE STREQUAL Debug)
 

@@ -1,9 +1,9 @@
 /home/jholten/kernels/kamis_kernels/4elt-sorted.graph.kernel
-/home/jholten/kernels/kamis_kernels/598a-sorted.graph.kernel
-/home/jholten/kernels/kamis_kernels/amazon-2008-sorted.graph.kernel
-#/home/jholten/kernels/kamis_kernels/as-skitter-sorted.graph.kernel
+#/home/jholten/kernels/kamis_kernels/598a-sorted.graph.kernel
+#/home/jholten/kernels/kamis_kernels/amazon-2008-sorted.graph.kernel
+/home/jholten/kernels/kamis_kernels/as-skitter-sorted.graph.kernel
 #/home/jholten/kernels/kamis_kernels/auto-sorted.graph.kernel
-#/home/jholten/kernels/kamis_kernels/bcsstk30-sorted.graph.kernel
+/home/jholten/kernels/kamis_kernels/bcsstk30-sorted.graph.kernel
 #/home/jholten/kernels/kamis_kernels/beethoven-sorted.graph.kernel
 #/home/jholten/kernels/kamis_kernels/blob-sorted.graph.kernel
 #/home/jholten/kernels/kamis_kernels/blockqp1.mtx-sorted.graph.kernel
