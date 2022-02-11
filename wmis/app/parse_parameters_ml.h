@@ -10,6 +10,7 @@
 #include <omp.h>
 
 #include "configuration_mis.h"
+#include <filesystem>
 
 /**
  * Parse the given parameters and apply them to the config.
@@ -152,7 +153,20 @@ int parse_parameters_ml(int argn, char **argv,
     }
 
     if (model->count > 0) {
-        mis_config.model = model->sval[0];
+        // check if absolute path
+        std::filesystem::path model_path(model->sval[0]);
+        if (model_path.is_absolute())
+            mis_config.model = model_path.string();
+        // otherwise assume relative to MODEL_DIR
+        else {
+            model_path = MODEL_DIR;
+            model_path.append(model->sval[0]);
+        }
+        // check if valid path
+        if (std::ifstream model_file(model_path); !model_file) {
+            std::cerr << "iterative-ml: ERROR: Please provide a valid ml model path." << std::endl;
+            exit(1);
+        }
     }
 
     arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
