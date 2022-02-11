@@ -296,6 +296,7 @@ void ml_features::regularize() {
             if (col < FEATURE_NUM) {
                 // copy the row
                 regularized_feature_matrix.push_back(**row);
+                // copy averaged label
                 regularized_label_data.push_back(label_sum / (float) (next-row));
                 // advance row to next
                 row = next;

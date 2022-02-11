@@ -89,7 +89,7 @@ int main(int argn, char** argv) {
     const char *eval_result = nullptr;
 
     for (int i = 0; i < n_trees; ++i) {
-        std::cout << "LOG: ml-train: round " << i << "of training\n";
+        std::cout << "LOG: ml-train: round " << i << " of training\n";
         safe_xgboost(XGBoosterUpdateOneIter(booster, i, train_features.getDMatrix()));
         safe_xgboost(XGBoosterEvalOneIter(booster, i, eval_dmats, eval_names, 2, &eval_result));
         printf("%s\n", eval_result);
