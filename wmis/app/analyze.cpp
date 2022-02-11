@@ -4,6 +4,9 @@
 
 #include <graph_access.h>
 #include <graph_io.h>
+#include <xgboost/c_api.h>
+#include <safe_c_api.h>
+#include <sstream>
 
 bool strCompare(const std::string & str1, const std::string & str2) {
     return str1.size() == str2.size() && std::equal(str1.begin(), str1.end(), str2.begin(), [](unsigned char c1, unsigned char c2){ return std::toupper(c1) == std::toupper(c2); });
@@ -33,7 +36,39 @@ int main(int argc, char** argv) {
 
     // analyze model
     if (strCompare(argv[1],"model")) {
-        return 1;
+        BoosterHandle booster;
+        safe_xgboost(XGBoosterCreate(nullptr, 0, &booster));
+        safe_xgboost(XGBoosterLoadModel(booster, argv[2]))
+        bst_ulong features;
+        safe_xgboost(XGBoosterGetNumFeature(booster, &features));
+        std::cout << "model has " << features << " features" << std::endl;
+        std::vector<std::string> types = {"weight", "gain", "cover", "total_gain", "total_cover"};
+        bst_ulong out_n_features = 13;
+        auto out_features = (char const**) malloc(60);
+        bst_ulong out_dim = 1;
+        auto out_shape = (bst_ulong const*) malloc(60);
+        auto out_scores = (float const*) malloc(60);
+        for (auto type : types) {
+            std::stringstream config;
+            config << "{\"importance_type\":" << "\"" <<  type << "\","
+                   << R"("feature_names": ["NODES", "EDGES", "DEG", "CHI2_DEG", "AVG_CHI2_DEG", "LCC", "CHI2_LCC", "CHROMATIC", "T_WEIGHT", "NODE_W", "W_DEG", "CHI2_W_DEG", "LOCAL_SEARCH"]})";
+            safe_xgboost(XGBoosterFeatureScore(booster, config.str().c_str(), &out_n_features, &out_features, &out_dim, &out_shape, &out_scores));
+            std::stringstream file_name;
+            file_name << MODEL_DIR << "/score_" << type << ".txt";
+            std::vector<float> scores(out_scores, out_scores + out_n_features);
+            std::vector<std::string> feature_names;
+            for (size_t index = 0; index < out_n_features; ++index) {
+                feature_names.emplace_back(*(out_features+index));
+            }
+            std::ofstream output_file(file_name.str());
+            for (int i = 0; i < out_n_features; ++i) {
+                output_file << feature_names[i] << " " << scores[i] << std::endl;
+            }
+        }
+        // free(out_features);
+        // free((void *) out_shape);
+        // free((void *) out_scores);
+        return 0;
     }
 
     // check whether set is independent
