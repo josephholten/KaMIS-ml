@@ -1089,7 +1089,6 @@ void generalized_fold_reduction::apply(branch_and_reduce_algorithm* br_alg) {
 ml_reduction::ml_reduction(size_t n) : general_reduction(n) {
     // init booster
     safe_xgboost(XGBoosterCreate(nullptr, 0, &booster));
-    safe_xgboost(XGBoosterSetParam(booster, "eta", "1"));
     safe_xgboost(XGBoosterSetParam(booster, "nthread", "16"));
 }
 
