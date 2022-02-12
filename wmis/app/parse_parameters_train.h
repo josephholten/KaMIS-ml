@@ -10,6 +10,7 @@
 #include <omp.h>
 
 #include "configuration_mis.h"
+#include <filesystem>
 
 /**
  * Parse the given parameters and apply them to the config.
