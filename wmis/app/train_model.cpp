@@ -75,7 +75,7 @@ int main(int argn, char** argv) {
     safe_xgboost(XGBoosterSetParam(booster, "max_depth", "5"));
     safe_xgboost(XGBoosterSetParam(booster, "eta", "0.3"));
     safe_xgboost(XGBoosterSetParam(booster, "verbosity", "1"));
-    safe_xgboost(XGBoosterSetParam(booster, "subsample", "0.5"));
+    safe_xgboost(XGBoosterSetParam(booster, "subsample", "0.6"));
 
     float scale = train_features.scale_pos_weight_param();
     std::stringstream ss;
