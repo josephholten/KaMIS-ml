@@ -78,8 +78,13 @@ int main(int argn, char **argv) {
         mis_config.reduction_style = MISConfig::ML;
 
         mis_config.graph_filename = graph_filepath.substr(graph_filepath.find_last_of('/') + 1);
-        if (mis_config.console_log)
+        if (mis_config.console_log) {
             std::cout << "graph " << mis_config.graph_filename << std::endl;
+            std::cout << "config " << "ls_rounds " << mis_config.ls_rounds << ", "
+                      << "ls_time " << mis_config.ls_time << ", "
+                      << " ml_pruning " << mis_config.ml_pruning
+                      << std::endl;
+        }
         mis_log::instance()->set_config(mis_config);
 
         // Read the graph

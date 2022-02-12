@@ -106,7 +106,12 @@ int main(int argn, char** argv) {
     strftime(time_stamp_name, sizeof(time_stamp_name), MODEL_DIR "/%y-%m-%d_%H-%M-%S.model", t);
 
     // saving model
-    std::cout << "LOG: ml-train: saving model into " MODEL_DIR "/latest.model and " << time_stamp_name << "\n";
+    std::cout << "LOG: ml-train: saving model into "
+              << MODEL_DIR "/latest.model, "
+              << time_stamp_name << ", "
+              << mis_config.model.c_str()
+              << "\n";
+
     safe_xgboost(XGBoosterSaveModel(booster, MODEL_DIR "/latest.model"));
     safe_xgboost(XGBoosterSaveModel(booster, mis_config.model.c_str() ));
     safe_xgboost(XGBoosterSaveModel(booster, time_stamp_name));

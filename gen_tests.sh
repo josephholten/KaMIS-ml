@@ -46,9 +46,7 @@ graphs=$(find $GRAPH_DIR -type f -name "*.graph")
 # ls_rounds tests
 for graph in $graphs; do
     for r in 1 2 3 5 10; do 
-        config="echo config ls_rounds $r, ls_time 2, ml_pruning 0.97"
-        test_call="/home/jholten/KaMIS-ml/deploy/iterative_ml $graph --output=$OUTPUT_DIR/$test/$(basename $graph).mis.ls_rounds_$r --ls_rounds=$r --ls_time=2 --ml_pruning=0.97 --console_log"
-        echo "$config; $test_call" >> $tests_file
+        echo "/home/jholten/KaMIS-ml/deploy/iterative_ml $graph --output=$OUTPUT_DIR/$test/$(basename $graph).mis.ls_rounds_$r --ls_rounds=$r --ls_time=2 --ml_pruning=0.97 --console_log" >> $tests_file
     done
 done
 
