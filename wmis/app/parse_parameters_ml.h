@@ -162,6 +162,7 @@ int parse_parameters_ml(int argn, char **argv,
         else {
             model_path = MODEL_DIR;
             model_path.append(model->sval[0]);
+            mis_config.model = model_path.string();
         }
         // check if valid path
         if (std::ifstream model_file(model_path); !model_file) {

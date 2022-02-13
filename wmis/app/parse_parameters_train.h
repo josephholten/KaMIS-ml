@@ -63,6 +63,7 @@ int parse_parameters_train(int argn, char **argv,
     // Choose standard configuration
     configuration_mis cfg;
     cfg.standard(mis_config);
+    mis_config.model = "";
 
     // Parse the arguments
     int nerrors = arg_parse(argn, argv, argtable);
@@ -131,13 +132,14 @@ int parse_parameters_train(int argn, char **argv,
         else {
             model_path = MODEL_DIR;
             model_path.append(model->sval[0]);
+            mis_config.model = model_path.string();
         }
         // check if valid path
-        if (std::ifstream model_file(model_path); !model_file) {
-            std::cerr << "iterative-ml: ERROR: Please provide a valid ml model path." << std::endl;
+        if (std::ofstream model_file(model_path); !model_file) {
+            std::cerr << "train-model: ERROR: Please provide a valid ml model path." << std::endl;
             exit(1);
         }
-    }
+    } 
 
     arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
 
