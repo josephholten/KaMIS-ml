@@ -84,12 +84,11 @@ int main(int argn, char** argv) {
     safe_xgboost(XGBoosterSetParam(booster, "scale_pos_weight", ss.str().c_str()));
 
     std::cout << "LOG: ml-train: starting training\n";
-    int n_trees = 30;
+    int n_trees = 50;
     const char *eval_names[2] = {"train", "test"};
     const char *eval_result = nullptr;
 
     for (int i = 0; i < n_trees; ++i) {
-        std::cout << "LOG: ml-train: round " << i << " of training\n";
         safe_xgboost(XGBoosterUpdateOneIter(booster, i, train_features.getDMatrix()));
         safe_xgboost(XGBoosterEvalOneIter(booster, i, eval_dmats, eval_names, 2, &eval_result));
         printf("%s\n", eval_result);
@@ -113,7 +112,8 @@ int main(int argn, char** argv) {
               << "\n";
 
     safe_xgboost(XGBoosterSaveModel(booster, MODEL_DIR "/latest.model"));
-    safe_xgboost(XGBoosterSaveModel(booster, mis_config.model.c_str() ));
+    if (!mis_config.model.empty())
+        safe_xgboost(XGBoosterSaveModel(booster, mis_config.model.c_str() ));
     safe_xgboost(XGBoosterSaveModel(booster, time_stamp_name));
 
     safe_xgboost(XGBoosterFree(booster));  // this also frees the eval_dmats (?)
