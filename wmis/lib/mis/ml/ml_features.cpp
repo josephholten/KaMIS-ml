@@ -115,8 +115,14 @@ void ml_features::calcFeatures(graph_access& G) {
     // timer t;
 
     NodeWeight total_weight = 0;
+    NodeWeight min_weight = std::numeric_limits<NodeWeight>::max();
+    NodeWeight max_weight = std::numeric_limits<NodeWeight>::min();
+
     forall_nodes(G, node) {
-        total_weight += G.getNodeWeight(node);
+        NodeWeight weight = G.getNodeWeight(node);
+        total_weight += weight;
+        min_weight = std::min(weight, min_weight);
+        max_weight = std::max(weight, max_weight);
     } endfor
 
     // greedy node coloring
@@ -168,7 +174,7 @@ void ml_features::calcFeatures(graph_access& G) {
 
         std::cout << "ls_std_dev " << std_dev << std::endl;
     }
-    // loop variales
+    // loop variables
     EdgeID local_edges = 0;
     std::unordered_set<NodeID> neighbors {};      // don't know how to do faster? maybe using bitset from boost?
     neighbors.reserve(G.getMaxDegree()+1);
@@ -199,11 +205,18 @@ void ml_features::calcFeatures(graph_access& G) {
             getFeature<LCC>(node) = 0;
         avg_lcc += getFeature<LCC>(node);
 
-        // local chromatic density
+        // local chromatic density and maximum weight in neighborhood
+        NodeWeight max_neighborhood_weight = std::numeric_limits<NodeWeight>::min();
+        NodeWeight sum_neighborhood_weight = 0;
         forall_out_edges(G, edge, node) {
-            used_colors[node_coloring[G.getEdgeTarget(edge)]] = true;
+            NodeID neighbor = G.getEdgeTarget(edge);
+            used_colors[node_coloring[neighbor]] = true;
+            max_neighborhood_weight = std::max(max_neighborhood_weight, G.getNodeWeight(neighbor));
+            sum_neighborhood_weight += G.getNodeWeight(neighbor);
         } endfor
         getFeature<CHROMATIC>(node) = (float) std::accumulate(used_colors.begin(), used_colors.end(), 0) / (float) greedy_chromatic_number;
+        getFeature<MAX_NEIGHBORHOOD_W>(node) = max_neighborhood_weight;
+        getFeature<HT>(node) = sum_neighborhood_weight - G.getNodeWeight(node);
 
         // total weight
         getFeature<T_WEIGHT>(node) = (float) total_weight;
@@ -220,6 +233,9 @@ void ml_features::calcFeatures(graph_access& G) {
         // local search
         getFeature<LOCAL_SEARCH>(node) += (float) ls_signal[node] / mis_config.ls_rounds;
 
+        // minimum and maximum overall weight
+        getFeature<MAX_W>(node) = max_weight;
+        getFeature<MIN_W>(node) = min_weight;
     } endfor
 
     avg_lcc /= (float) G.number_of_nodes();
