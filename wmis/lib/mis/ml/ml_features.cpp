@@ -139,41 +139,41 @@ void ml_features::calcFeatures(graph_access& G) {
     int greedy_chromatic_number = *std::max_element(node_coloring.begin(), node_coloring.end()) + 1;
     std::vector<bool> used_colors(greedy_chromatic_number);
 
-    // local search
-    std::vector<int> ls_signal(G.number_of_nodes(), 0);
-    std::random_device rd;
+    // // local search
+    // std::vector<int> ls_signal(G.number_of_nodes(), 0);
+    // std::random_device rd;
 
-    for (int round = 0; round < mis_config.ls_rounds; ++round) {
-        // TODO: only reduce the graph once, then perform the LS rounds with different seeds
-        mis_config.seed = (int) rd();
-        std::cout << "ls_round " << round << std::endl;
-        weighted_ls ls(mis_config, G);
-        ls.run_ils();
-        forall_nodes(G, node) {
-            ls_signal[node] += (int) G.getPartitionIndex(node);
-        } endfor
-    }
+    // for (int round = 0; round < mis_config.ls_rounds; ++round) {
+    //     // TODO: only reduce the graph once, then perform the LS rounds with different seeds
+    //     mis_config.seed = (int) rd();
+    //     std::cout << "ls_round " << round << std::endl;
+    //     weighted_ls ls(mis_config, G);
+    //     ls.run_ils();
+    //     forall_nodes(G, node) {
+    //         ls_signal[node] += (int) G.getPartitionIndex(node);
+    //     } endfor
+    // }
 
-    if (mis_config.console_log) {
-        int count = 0;
-        double mean = 0;
-        double std_dev = 0;
-        for (const auto& val : ls_signal) {
-            if (val != 0) {
-                mean += val;
-                ++count;
-            }
-        }
-        mean /= count;
-        for (const auto& val : ls_signal) {
-            if (val != 0) {
-                std_dev += (mean - val) * (mean - val);
-            }
-        }
-        std_dev /= count;
+    // if (mis_config.console_log) {
+    //     // int count = 0;
+    //     double mean = 0;
+    //     double std_dev = 0;
+    //     for (const auto& val : ls_signal) {
+    //         if (val != 0) {
+    //             mean += val;
+    //             ++count;
+    //         }
+    //     }
+    //     mean /= count;
+    //     for (const auto& val : ls_signal) {
+    //         if (val != 0) {
+    //             std_dev += (mean - val) * (mean - val);
+    //         }
+    //     }
+    //     std_dev /= count;
 
-        std::cout << "ls_std_dev " << std_dev << std::endl;
-    }
+    //     std::cout << "ls_std_dev " << std_dev << std::endl;
+    // }
     // loop variables
     EdgeID local_edges = 0;
     std::unordered_set<NodeID> neighbors {};      // don't know how to do faster? maybe using bitset from boost?
@@ -230,8 +230,8 @@ void ml_features::calcFeatures(graph_access& G) {
         } endfor
         avg_wdeg = getFeature<W_DEG>(node);
 
-        // local search
-        getFeature<LOCAL_SEARCH>(node) += (float) ls_signal[node] / mis_config.ls_rounds;
+        // // local search
+        // getFeature<LOCAL_SEARCH>(node) += (float) ls_signal[node] / mis_config.ls_rounds;
 
         // minimum and maximum overall weight
         getFeature<MAX_W>(node) = max_weight;
