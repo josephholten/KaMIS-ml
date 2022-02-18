@@ -57,7 +57,7 @@ def parse_log_single(file_path):
 DEFAULT_CONFIG = {"ls_rounds": 2, "ls_time": 2, "ml_pruning": 0.97}
 
 output_directory = "/home/jholten/perf_tests_kamis_ml"
-test_name = "with_regularization"
+test_name = "mtx_model"
 config = DEFAULT_CONFIG
 
 # evaluate tests
@@ -68,37 +68,32 @@ with open("/home/jholten/KaMIS-ml/optima.txt") as optimum_file:
 
 # if not os.path.isfile(f"{output_directory}/{test_name}/info.json"):
 
-log_normal = parse_log_single(f"{output_directory}/64/log.txt")
-log_reg = parse_log_single(f"{output_directory}/with_regularization/log.txt")
+log = parse_log_single(f"{output_directory}/{test_name}/log.txt")
 
 graphing_data = {}
 
 # chart ratio & time
 # group by "graph"
-for test in log_normal:
+for test in log:
     graphing_data[test["graph"]] = {'ratio_normal': test["info"]["ratio"],
                                     'time_normal': test["info"]["time"],
                                     'label': test["graph"][:-len("-sorted.graph")]}
-
-for test in log_reg:
-    graphing_data[test["graph"]].update({'ratio_reg': test["info"]["ratio"],
-                                         'time_reg': test["info"]["time"]})
 
 bar_width = 0.33
 x = np.arange(len(graphing_data))
 
 fig, axes = plt.subplots(2, 1)
 
-fig.suptitle("regularization of training data and new training parameters")
+fig.suptitle("training on mtx test graphs only")
 
-axes[0].bar(x - bar_width / 2, [data['ratio_normal'] for data in graphing_data.values()], label="Naive model", width=bar_width)
-axes[0].bar(x + bar_width / 2, [data['ratio_reg'] for data in graphing_data.values()], label="Regularized model", width=bar_width)
+p1 = axes[0].bar(x, [data['ratio_normal'] for data in graphing_data.values()], label="Naive model", width=bar_width)
+axes[0].bar_label(p1)
 
 axes[0].set_ylabel("KaMIS-ml(G)/$\\alpha$(G)")
 axes[0].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
 
-axes[1].bar(x - bar_width / 2, [data['time_normal'] for data in graphing_data.values()], label="Naive", width=bar_width)
-axes[1].bar(x + bar_width / 2, [data['time_reg'] for data in graphing_data.values()], label="Regularized", width=bar_width)
+p2 = axes[1].bar(x, [data['time_normal'] for data in graphing_data.values()], label="Naive", width=bar_width)
+axes[1].bar_label(p2)
 
 axes[1].set_xticks(x, [data['label'] for data in graphing_data.values()], rotation=315, horizontalalignment="left")
 axes[1].set_yscale('log')
@@ -106,7 +101,7 @@ axes[1].set_ylabel('t')
 
 axes[1].set_title(f"")
 
-axes[1].legend()
+#axes[1].legend()
 
 plt.subplots_adjust(hspace=0.1, bottom=0.25)
 plt.savefig(f"{test_name}_tests.pdf", dpi=(300))
