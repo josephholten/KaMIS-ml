@@ -14,6 +14,30 @@
 #include "weighted_ls.h"
 #include "stat.h"
 
+void assign_weights(graph_access& G, const MISConfig& mis_config) {
+    constexpr NodeWeight MAX_WEIGHT = 200;
+
+    if (mis_config.weight_source == MISConfig::Weight_Source::HYBRID) {
+        forall_nodes(G, node) {
+            G.setNodeWeight(node, (node + 1) % MAX_WEIGHT + 1);
+        } endfor
+    } else if (mis_config.weight_source == MISConfig::Weight_Source::UNIFORM) {
+        std::default_random_engine generator(mis_config.seed);
+        std::uniform_int_distribution<NodeWeight> distribution(1,MAX_WEIGHT);
+
+        forall_nodes(G, node) {
+            G.setNodeWeight(node, distribution(generator));
+        } endfor
+    } else if (mis_config.weight_source == MISConfig::Weight_Source::GEOMETRIC) {
+        std::default_random_engine generator(mis_config.seed);
+        std::binomial_distribution<int> distribution(MAX_WEIGHT / 2);
+
+        forall_nodes(G, node) {
+            G.setNodeWeight(node, distribution(generator));
+        } endfor
+    }
+}
+
 // constructors
 // for training (many graphs with labels)
 ml_features::ml_features(const MISConfig& config)
@@ -75,6 +99,7 @@ void ml_features::fromPaths(const std::vector<std::string> &all_graph_paths, con
         std::cout << "LOG: ml-calcFeatures: graph " << graph_paths[i] << " (" << (float) i / graph_paths.size() * 100 << "%)\n";
         graph_access G;
         graph_io::readGraphWeighted(G, graph_paths[i]);
+        assign_weights(G, mis_config);
         std::vector<float> labels(G.number_of_nodes(), 0);
         graph_io::readVector<float>(labels.begin(), offsets[i+1]-offsets[i], label_paths[i]);
 
