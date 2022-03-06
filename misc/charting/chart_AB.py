@@ -57,7 +57,7 @@ def parse_log_single(file_path):
 DEFAULT_CONFIG = {"ls_rounds": 2, "ls_time": 2, "ml_pruning": 0.97}
 
 output_directory = "/home/jholten/perf_tests_kamis_ml"
-test_name = "new_features"
+test_name = "no_ls"
 config = DEFAULT_CONFIG
 
 # evaluate tests
@@ -68,8 +68,8 @@ with open("/home/jholten/KaMIS-ml/optima.txt") as optimum_file:
 
 # if not os.path.isfile(f"{output_directory}/{test_name}/info.json"):
 
-log_normal = parse_log_single(f"{output_directory}/with_regularization/log.txt")
-log_new = parse_log_single(f"{output_directory}/new_features/log.txt")
+log_normal = parse_log_single(f"{output_directory}/new_features/log.txt")
+log_new = parse_log_single(f"{output_directory}/no_ls/log.txt")
 
 graphing_data = {}
 
@@ -89,16 +89,16 @@ x = np.arange(len(graphing_data))
 
 fig, axes = plt.subplots(2, 1)
 
-fig.suptitle("New Features")
+fig.suptitle("A/B tests: No local search rounds")
 
-axes[0].bar(x - bar_width / 2, [data['ratio_normal'] for data in graphing_data.values()], label="Old Features", width=bar_width)
-axes[0].bar(x + bar_width / 2, [data['ratio_reg'] for data in graphing_data.values()], label="New Features", width=bar_width)
+axes[0].bar(x - bar_width / 2, [data['ratio_normal'] for data in graphing_data.values()], label="With", width=bar_width)
+axes[0].bar(x + bar_width / 2, [data['ratio_reg'] for data in graphing_data.values()], label="Without", width=bar_width)
 
 axes[0].set_ylabel("KaMIS-ml(G)/$\\alpha$(G)")
 axes[0].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
 
-axes[1].bar(x - bar_width / 2, [data['time_normal'] for data in graphing_data.values()], label="Old", width=bar_width)
-axes[1].bar(x + bar_width / 2, [data['time_reg'] for data in graphing_data.values()], label="New", width=bar_width)
+axes[1].bar(x - bar_width / 2, [data['time_normal'] for data in graphing_data.values()], label="With", width=bar_width)
+axes[1].bar(x + bar_width / 2, [data['time_reg'] for data in graphing_data.values()], label="Without", width=bar_width)
 
 axes[1].set_xticks(x, [data['label'] for data in graphing_data.values()], rotation=315, horizontalalignment="left")
 axes[1].set_yscale('log')

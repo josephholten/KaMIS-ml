@@ -33,6 +33,7 @@
 docs/*
 models/*
 !models/standard.model
+misc/*.pdf
 
 # Executable folders
 deploy
