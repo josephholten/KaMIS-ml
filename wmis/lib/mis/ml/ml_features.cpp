@@ -14,7 +14,7 @@
 #include "weighted_ls.h"
 #include "stat.h"
 
-void assign_weights(graph_access& G, const MISConfig& mis_config) {
+void ml_assign_weights(graph_access& G, const MISConfig& mis_config) {
     constexpr NodeWeight MAX_WEIGHT = 200;
 
     if (mis_config.weight_source == MISConfig::Weight_Source::HYBRID) {
@@ -99,7 +99,7 @@ void ml_features::fromPaths(const std::vector<std::string> &all_graph_paths, con
         std::cout << "LOG: ml-calcFeatures: graph " << graph_paths[i] << " (" << (float) i / graph_paths.size() * 100 << "%)\n";
         graph_access G;
         graph_io::readGraphWeighted(G, graph_paths[i]);
-        assign_weights(G, mis_config);
+        ml_assign_weights(G, mis_config);
         std::vector<float> labels(G.number_of_nodes(), 0);
         graph_io::readVector<float>(labels.begin(), offsets[i+1]-offsets[i], label_paths[i]);
 
