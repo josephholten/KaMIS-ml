@@ -6,7 +6,7 @@
 #include "graph_io.h"
 
 int main(int argc, char** argv) {
-    if (argc != 2) {
+    if (argc != 3) {
         std::cerr << "Provide first the graph, then the IS" << std::endl;
         return 1;
     }
@@ -23,5 +23,5 @@ int main(int argc, char** argv) {
             weight += G.getNodeWeight(node);
     } endfor
 
-    std::cout << weight << std::endl;
+    std::cout << argv[1] << " " << weight << std::endl;
 }
