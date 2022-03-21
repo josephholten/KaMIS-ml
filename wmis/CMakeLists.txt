@@ -197,3 +197,7 @@ add_executable(analyze "app/analyze.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_O
 target_link_libraries(analyze xgboost)
 
 add_executable(assign_weights "app/assign_weights.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
+target_link_libraries(assign_weights xgboost)
+
+add_executable(read_IS "app/read_IS.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
+target_link_libraries(read_IS xgboost)
