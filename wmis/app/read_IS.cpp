@@ -12,10 +12,13 @@ int main(int argc, char** argv) {
     }
 
     graph_access G;
-    graph_io::readGraphWeighted(G, argv[1]);
+    std::string filename (argv[1]);
+    graph_io::readGraphWeighted(G, filename);
 
     std::vector<int> IS;
-    graph_io::readVector(IS, argv[2]);
+    IS.resize(G.number_of_nodes());
+    std::string filename_IS (argv[2]);
+    graph_io::readVector(IS, filename_IS);
 
     NodeWeight weight = 0;
     forall_nodes(G, node) {
