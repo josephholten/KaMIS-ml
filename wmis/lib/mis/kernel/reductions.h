@@ -20,7 +20,7 @@
 
 class branch_and_reduce_algorithm;
 
-enum reduction_type { neighborhood, fold2, clique, critical_set, clique_neighborhood_fast, clique_neighborhood, twin, domination, generalized_neighborhood, generalized_fold, ml };
+enum reduction_type { neighborhood, fold2, clique, critical_set, clique_neighborhood_fast, clique_neighborhood, twin, domination, generalized_neighborhood, generalized_fold, ml, greedy };
 constexpr size_t REDUCTION_NUM = 11;
 
 class vertex_marker {
@@ -265,6 +265,16 @@ private:
     bool booster_model_loaded = false;
 };
 
+struct greedy_reduction : public general_reduction {
+    greedy_reduction(size_t n);
+    ~greedy_reduction() {}
+    virtual greedy_reduction* clone() const final { return new greedy_reduction(*this); }
+
+    virtual reduction_type get_reduction_type() const final { return reduction_type::greedy; }
+    virtual bool reduce(branch_and_reduce_algorithm* br_alg) final;
+    virtual void restore(branch_and_reduce_algorithm* br_alg) final;
+    virtual void apply(branch_and_reduce_algorithm* br_alg) final;
+};
 
 struct reduction_ptr {
 	general_reduction* reduction = nullptr;

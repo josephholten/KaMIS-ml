@@ -1185,7 +1185,28 @@ void ml_reduction::apply(branch_and_reduce_algorithm *br_alg) {
 
 }
 
-// Questions:
-// - what exactly is reverse_mapping? what direction?
-// - do I need restore or apply
-// - what can I use run_ils? do I need to do setup? what parameters should I use?
+bool greedy_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
+    auto &status = br_alg->status;
+    if (status.remaining_nodes <= 1)
+        return false;
+
+    NodeID max_node = 0;
+    long max_value = std::numeric_limits<long>::lowest();
+
+    for (int index = 0; index < marker.current_size(); ++index) {
+        NodeID node = marker.current_vertex(index);
+
+        long ht = 0;
+        for (NodeID neighbor : status.graph[node])
+            ht += status.weights[neighbor];
+        ht -= status.weights[node];
+
+        if (ht > max_value) {
+            max_node = node;
+            max_value = ht;
+        }
+    }
+
+    br_alg->set(max_node, IS_status::excluded);
+    return true;
+}
