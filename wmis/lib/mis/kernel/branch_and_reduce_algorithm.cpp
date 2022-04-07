@@ -27,6 +27,8 @@ branch_and_reduce_algorithm::branch_and_reduce_algorithm(graph_access& G, const 
                 global_status.n);
     } else if (config.reduction_style == MISConfig::Reduction_Style::ML) {
         global_status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, clique_neighborhood_reduction, critical_set_reduction, generalized_fold_reduction, ml_reduction>(global_status.n);
+    } else if (config.reduction_style == MISConfig::Reduction_Style::GREEDY) {
+        global_status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, clique_neighborhood_reduction, critical_set_reduction, generalized_fold_reduction, greedy_reduction>(global_status.n);
     } else {
 		// MISConfig::Reduction_Style::NORMAL
 		global_status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, clique_neighborhood_reduction, critical_set_reduction, generalized_fold_reduction>(global_status.n);
@@ -45,6 +47,12 @@ branch_and_reduce_algorithm::branch_and_reduce_algorithm(graph_access& G, const 
                 status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, clique_neighborhood_reduction, critical_set_reduction>(status.n);
             } else {
                 status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, clique_neighborhood_reduction, critical_set_reduction, generalized_fold_reduction, ml_reduction>(status.n);
+            }
+        } else if (this->config.reduction_style == MISConfig::Reduction_Style::GREEDY) {
+            if (called_from_fold) {
+                status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, clique_neighborhood_reduction, critical_set_reduction>(status.n);
+            } else {
+                status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, clique_neighborhood_reduction, critical_set_reduction, generalized_fold_reduction, greedy_reduction>(status.n);
             }
         } else {
 			// MISConfig::Reduction_Style::NORMAL

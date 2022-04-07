@@ -74,6 +74,7 @@ private:
 	friend generalized_neighborhood_reduction;
 	friend generalized_fold_reduction;
     friend ml_reduction;
+    friend greedy_reduction;
 
 
 
