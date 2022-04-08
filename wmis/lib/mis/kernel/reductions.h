@@ -21,7 +21,7 @@
 class branch_and_reduce_algorithm;
 
 enum reduction_type { neighborhood, fold2, clique, critical_set, clique_neighborhood_fast, clique_neighborhood, twin, domination, generalized_neighborhood, generalized_fold, ml, greedy };
-constexpr size_t REDUCTION_NUM = 11;
+constexpr size_t REDUCTION_NUM = 12;
 
 class vertex_marker {
 private:
