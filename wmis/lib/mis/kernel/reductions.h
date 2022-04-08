@@ -266,14 +266,12 @@ private:
 };
 
 struct greedy_reduction : public general_reduction {
-    greedy_reduction(size_t n);
+    greedy_reduction(size_t n) : general_reduction(n) {};
     ~greedy_reduction() {}
     virtual greedy_reduction* clone() const final { return new greedy_reduction(*this); }
 
     virtual reduction_type get_reduction_type() const final { return reduction_type::greedy; }
     virtual bool reduce(branch_and_reduce_algorithm* br_alg) final;
-    virtual void restore(branch_and_reduce_algorithm* br_alg) final;
-    virtual void apply(branch_and_reduce_algorithm* br_alg) final;
 };
 
 struct reduction_ptr {
