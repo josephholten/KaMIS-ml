@@ -57,7 +57,7 @@ def parse_log_single(file_path):
 DEFAULT_CONFIG = {"ls_rounds": 2, "ls_time": 2, "ml_pruning": 0.97}
 
 output_directory = "/home/jholten/perf_tests_kamis_ml"
-test_name = "greedy_geometric"
+test_name = "greedy_ml"
 config = DEFAULT_CONFIG
 
 # evaluate tests
@@ -67,42 +67,48 @@ with open("/home/jholten/weighted_optima.txt") as optimum_file:
 
 # if not os.path.isfile(f"{output_directory}/{test_name}/info.json"):
 
-log_ml = parse_log_single(f"{output_directory}/greedy_ml/log.txt")
-log_ml = list(filter(lambda x: "geo" in x["graph"], log_ml))
+log = parse_log_single(f"{output_directory}/{test_name}/log.txt")
 
-log_greedy = parse_log_single(f"{output_directory}/greedy/log2.txt")
+log_uni = list(filter(lambda x: "uni" in x["graph"], log))
+log_geo = list(filter(lambda x: "geo" in x["graph"], log))
+log_hyb = list(filter(lambda x: "hyb" in x["graph"], log))
 
 graphing_data = {}
 
 # chart ratio & time
 # group by "graph"
-for test in log_ml:
+for test in log_uni:
     graph = os.path.splitext(test["graph"])[0]
-    graphing_data[graph] = {'ratio_ml': test["info"]["ratio"],
-                            'time_ml': test["info"]["time"],
+    graphing_data[graph] = {'ratio_uni': test["info"]["ratio"],
+                            'time_uni': test["info"]["time"],
                             'label': graph[:-len("-sorted.graph")]}
-for test in log_greedy:
+for test in log_geo:
     graph = os.path.splitext(test["graph"])[0]
-    graphing_data[graph].update({'ratio_greedy': test["info"]["ratio"],
-                                 'time_greedy': test["info"]["time"]})
+    graphing_data[graph].update({'ratio_geo': test["info"]["ratio"],
+                                         'time_geo': test["info"]["time"]})
 
-del graphing_data["Ga3As3H12.mtx-sorted.graph"]
+for test in log_hyb:
+    graph = os.path.splitext(test["graph"])[0]
+    graphing_data[graph].update({'ratio_hyb': test["info"]["ratio"],
+                                         'time_hyb': test["info"]["time"]})
 
 bar_width = 0.25
 x = np.arange(len(graphing_data))
 
 fig, axes = plt.subplots(2, 1)
 
-fig.suptitle("Greedy tie-braking reductions vs ML iterative reductions\n(uniform weights)")
+fig.suptitle("Greedy tie-braking reductions")
 
-axes[0].bar(x, [data['ratio_ml'] for data in graphing_data.values()], label="ML", width=bar_width)
-axes[0].bar(x + bar_width, [data['ratio_greedy'] for data in graphing_data.values()], label="Greedy", width=bar_width)
+axes[0].bar(x, [data['ratio_uni'] for data in graphing_data.values()], label="Uniform", width=bar_width)
+axes[0].bar(x + bar_width, [data['ratio_geo'] for data in graphing_data.values()], label="Geometric", width=bar_width)
+axes[0].bar(x + 2*bar_width, [data['ratio_hyb'] for data in graphing_data.values()], label="Hybrid", width=bar_width)
 
 axes[0].set_ylabel("KaMIS-ml(G)/$\\alpha$(G)")
 axes[0].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
 
-axes[1].bar(x, [data['time_ml'] for data in graphing_data.values()], label="ML", width=bar_width)
-axes[1].bar(x + bar_width, [data['time_greedy'] for data in graphing_data.values()], label="Greedy", width=bar_width)
+axes[1].bar(x, [data['time_uni'] for data in graphing_data.values()], label="Uniform", width=bar_width)
+axes[1].bar(x + bar_width, [data['time_geo'] for data in graphing_data.values()], label="Geometric", width=bar_width)
+axes[1].bar(x + 2*bar_width, [data['time_hyb'] for data in graphing_data.values()], label="Hybrid", width=bar_width)
 
 axes[1].set_xticks(x, [data['label'] for data in graphing_data.values()], rotation=315, horizontalalignment="left")
 axes[1].set_yscale('log')
