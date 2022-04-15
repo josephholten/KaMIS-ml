@@ -118,87 +118,96 @@ void ml_features::fillGraph(graph_access& G) {
         std::cerr << "Error: feature matrix was constructed for labels, so provide the labels for the graph.\n";
         exit(1);
     }
-    calcFeatures(G);
+    calculate_features(G);
 }
 
 void ml_features::fillGraph(graph_access& G, std::vector<float>& labels, NodeID offset) {
     if (!has_labels) {
         std::cerr << "Error: feature matrix was constructed not for labels, so the labels will be discarded.\n";
     }
-    calcFeatures(G);
+    calculate_features(G);
     std::copy(labels.begin(), labels.end(), label_data.begin() + offset);
 }
 
 
 
-template<ml_features::feature f>
-float& ml_features::getFeature(NodeID node) {
-    return feature_matrix[node + current_size][f];
-}
-
-void ml_features::calcFeatures(graph_access& G) {
-    // timer t;
+void ml_features::calculate_features(graph_access& G) {
+    // precompute values
 
     NodeWeight total_weight = 0;
     NodeWeight min_weight = std::numeric_limits<NodeWeight>::max();
-    NodeWeight max_weight = std::numeric_limits<NodeWeight>::min();
 
-    forall_nodes(G, node) {
-        NodeWeight weight = G.getNodeWeight(node);
-        total_weight += weight;
-        min_weight = std::min(weight, min_weight);
-        max_weight = std::max(weight, max_weight);
-    } endfor
+    NodeWeight max_weight = std::numeric_limits<NodeWeight>::min();
 
     // greedy node coloring
     std::vector<int> node_coloring(G.number_of_nodes());
     std::vector<bool> available(G.number_of_nodes(), true);
 
     forall_nodes(G, node) {
+        NodeWeight weight = G.getNodeWeight(node);
+
+#ifdef F_T_WEIGHT
+        total_weight += weight;
+#endif
+#ifdef F_MIN_W
+        min_weight = std::min(weight, min_weight);
+#endif
+#ifdef F_MAX_W
+        max_weight = std::max(weight, max_weight);
+#endif
+#ifdef F_CHROMATIC
         std::fill(available.begin(), available.end(), true);
         forall_out_edges(G, edge, node) {
             available[node_coloring[G.getEdgeTarget(edge)]] = false;
         } endfor
         node_coloring[node] = (int) (std::find_if(available.begin(), available.end(), [](bool x){ return x; }) - available.begin());
+#endif
+
     } endfor
+
+#ifdef F_CHROMATIC
     int greedy_chromatic_number = *std::max_element(node_coloring.begin(), node_coloring.end()) + 1;
     std::vector<bool> used_colors(greedy_chromatic_number);
+#endif
 
-    // // local search
-    // std::vector<int> ls_signal(G.number_of_nodes(), 0);
-    // std::random_device rd;
+#ifdef F_LS
+    // local search
+    std::vector<int> ls_signal(G.number_of_nodes(), 0);
+    std::random_device rd;
 
-    // for (int round = 0; round < mis_config.ls_rounds; ++round) {
-    //     // TODO: only reduce the graph once, then perform the LS rounds with different seeds
-    //     mis_config.seed = (int) rd();
-    //     std::cout << "ls_round " << round << std::endl;
-    //     weighted_ls ls(mis_config, G);
-    //     ls.run_ils();
-    //     forall_nodes(G, node) {
-    //         ls_signal[node] += (int) G.getPartitionIndex(node);
-    //     } endfor
-    // }
+    for (int round = 0; round < mis_config.ls_rounds; ++round) {
+        // TODO: only reduce the graph once, then perform the LS rounds with different seeds
+        mis_config.seed = (int) rd();
+        std::cout << "ls_round " << round << std::endl;
+        weighted_ls ls(mis_config, G);
+        ls.run_ils();
+        forall_nodes(G, node) {
+            ls_signal[node] += (int) G.getPartitionIndex(node);
+        } endfor
+    }
 
-    // if (mis_config.console_log) {
-    //     // int count = 0;
-    //     double mean = 0;
-    //     double std_dev = 0;
-    //     for (const auto& val : ls_signal) {
-    //         if (val != 0) {
-    //             mean += val;
-    //             ++count;
-    //         }
-    //     }
-    //     mean /= count;
-    //     for (const auto& val : ls_signal) {
-    //         if (val != 0) {
-    //             std_dev += (mean - val) * (mean - val);
-    //         }
-    //     }
-    //     std_dev /= count;
+    if (mis_config.console_log) {
+        // int count = 0;
+        double mean = 0;
+        double std_dev = 0;
+        for (const auto& val : ls_signal) {
+            if (val != 0) {
+                mean += val;
+                ++count;
+            }
+        }
+        mean /= count;
+        for (const auto& val : ls_signal) {
+            if (val != 0) {
+                std_dev += (mean - val) * (mean - val);
+            }
+        }
+        std_dev /= count;
 
-    //     std::cout << "ls_std_dev " << std_dev << std::endl;
-    // }
+        std::cout << "ls_std_dev " << std_dev << std::endl;
+    }
+#endif
+
     // loop variables
     EdgeID local_edges = 0;
     std::unordered_set<NodeID> neighbors {};      // don't know how to do faster? maybe using bitset from boost?
@@ -208,10 +217,16 @@ void ml_features::calcFeatures(graph_access& G) {
 
     forall_nodes(G, node){
         // num of nodes/ edges, deg
-        getFeature<NODES>(node) = (float) G.number_of_nodes();
-        getFeature<EDGES>(node) = (float) G.number_of_edges();
-        getFeature<DEG>(node) = (float) G.getNodeDegree(node);
-
+#ifdef F_NODES
+        get_feature<NODES>(node) = (float) G.number_of_nodes();
+#endif
+#ifdef F_EDGES
+        get_feature<EDGES>(node) = (float) G.number_of_edges();
+#endif
+#ifdef F_DEG
+        get_feature<DEG>(node) = (float) G.getNodeDegree(node);
+#endif
+#ifdef F_LCC
         // lcc
         neighbors.clear();
         forall_out_edges(G, edge, node) {
@@ -225,66 +240,109 @@ void ml_features::calcFeatures(graph_access& G) {
         }
 
         if (G.getNodeDegree(node) > 1)  // catch divide by zero
-            getFeature<LCC>(node) = ((float) local_edges) / ((float) (G.getNodeDegree(node) * (G.getNodeDegree(node) - 1)));
+            get_feature<LCC>(node) = ((float) local_edges) / ((float) (G.getNodeDegree(node) * (G.getNodeDegree(node) - 1)));
         else
-            getFeature<LCC>(node) = 0;
-        avg_lcc += getFeature<LCC>(node);
+            get_feature<LCC>(node) = 0;
+        avg_lcc += get_feature<LCC>(node);
+#endif
 
         // local chromatic density and maximum weight in neighborhood
         NodeWeight max_neighborhood_weight = std::numeric_limits<NodeWeight>::min();
         NodeWeight sum_neighborhood_weight = 0;
+
         forall_out_edges(G, edge, node) {
             NodeID neighbor = G.getEdgeTarget(edge);
+
+#ifdef F_CHROMATIC
             used_colors[node_coloring[neighbor]] = true;
+#endif
+
+#ifdef F_MAX_NEIGHBORHOOD_W
             max_neighborhood_weight = std::max(max_neighborhood_weight, G.getNodeWeight(neighbor));
+#endif
+
+#ifdef F_W_DEG
             sum_neighborhood_weight += G.getNodeWeight(neighbor);
+#endif
+
         } endfor
-        getFeature<CHROMATIC>(node) = (float) std::accumulate(used_colors.begin(), used_colors.end(), 0) / (float) greedy_chromatic_number;
-        getFeature<MAX_NEIGHBORHOOD_W>(node) = max_neighborhood_weight;
-        getFeature<HT>(node) = sum_neighborhood_weight - G.getNodeWeight(node);
 
+#ifdef F_CHROMATIC
+        get_feature<CHROMATIC>(node) = (float) std::accumulate(used_colors.begin(), used_colors.end(), 0) / (float) greedy_chromatic_number;
+#endif
+#ifdef F_MAX_NEIGHBORHOOD_W
+        get_feature<MAX_NEIGHBORHOOD_W>(node) = max_neighborhood_weight;
+#endif
+#ifdef F_HT
+        get_feature<HT>(node) = sum_neighborhood_weight - G.getNodeWeight(node);
+#endif
+#ifdef F_T_WEIGHT
         // total weight
-        getFeature<T_WEIGHT>(node) = (float) total_weight;
+        get_feature<T_WEIGHT>(node) = (float) total_weight;
+#endif
 
+#ifdef F_NODE_W
         // node weight
-        getFeature<NODE_W>(node) = (float) G.getNodeWeight(node);
+        get_feature<NODE_W>(node) = (float) G.getNodeWeight(node);
+#endif
 
+#ifdef F_W_DEG
         // node weighted degree
         forall_out_edges(G, edge, node) {
-            getFeature<W_DEG>(node) += (float) G.getNodeWeight(G.getEdgeTarget(edge));
+            get_feature<W_DEG>(node) += (float) G.getNodeWeight(G.getEdgeTarget(edge));
         } endfor
-        avg_wdeg = getFeature<W_DEG>(node);
-
-        // // local search
-        // getFeature<LOCAL_SEARCH>(node) += (float) ls_signal[node] / mis_config.ls_rounds;
+#endif
+#ifdef F_CHI2_W_DEG
+        avg_wdeg = get_feature<W_DEG>(node);
+#endif
+#ifdef F_LS
+        // local search
+        get_feature<LOCAL_SEARCH>(node) += (float) ls_signal[node] / mis_config.ls_rounds;
+#endif
 
         // minimum and maximum overall weight
-        getFeature<MAX_W>(node) = max_weight;
-        getFeature<MIN_W>(node) = min_weight;
+#ifdef F_MAX_W
+        get_feature<MAX_W>(node) = max_weight;
+#endif
+#ifdef F_MIN_W
+        get_feature<MIN_W>(node) = min_weight;
+#endif
     } endfor
 
+#ifdef F_CHI2_LCC
     avg_lcc /= (float) G.number_of_nodes();
+#endif
+#ifdef F_CHI2_W_DEG
     avg_wdeg /= (float) G.number_of_nodes();
+#endif
 
     // statistical features
+#ifdef F_AVG_CHI2_DEG
     float avg_deg = (2 * (float) G.number_of_edges()) / ((float) G.number_of_nodes());
+#endif
 
     forall_nodes(G,node) {
-        getFeature<CHI2_DEG>(node) = (float) chi2(G.getNodeDegree(node), avg_deg);
+#ifdef F_CHI2_DEG
+        get_feature<CHI2_DEG>(node) = (float) chi2(G.getNodeDegree(node), avg_deg);
+#endif
 
+#ifdef F_AVG_CHI2_DEG
         float avg_chi2_deg = 0;
         forall_out_edges(G, edge, node) {
-            avg_chi2_deg += getFeature<AVG_CHI2_DEG>(node);
+            avg_chi2_deg += get_feature<AVG_CHI2_DEG>(node);
         } endfor
 
         if(G.getNodeDegree(node) > 0)    // catch divide by zero
-            getFeature<AVG_CHI2_DEG>(node) = avg_chi2_deg / (float) G.getNodeDegree(node);
+            get_feature<AVG_CHI2_DEG>(node) = avg_chi2_deg / (float) G.getNodeDegree(node);
         else
-            getFeature<AVG_CHI2_DEG>(node) = 0;
-
-        getFeature<CHI2_LCC>(node) = (float) chi2(getFeature<LCC>(node), avg_lcc);
-
-        getFeature<CHI2_W_DEG>(node) = (float) chi2(getFeature<W_DEG>(node), avg_wdeg);
+            get_feature<AVG_CHI2_DEG>(node) = 0;
+#endif
+#ifdef F_CHI2_LCC
+        get_feature<CHI2_LCC>(node) = (float) chi2(get_feature<LCC>(node), avg_lcc);
+#endif
+#ifdef F_CHI2_W_DEG
+        get_feature<CHI2_W_DEG>(node) = (float) chi2(get_feature<W_DEG>(node), avg_wdeg);
+#endif
     } endfor
 
     current_size += G.number_of_nodes();
