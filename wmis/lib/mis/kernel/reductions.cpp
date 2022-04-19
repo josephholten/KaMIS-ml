@@ -1149,20 +1149,20 @@ bool ml_reduction::reduce(branch_and_reduce_algorithm* br_alg) {
     );
 
     // include upper q% of nodes
-    for(size_t index = 0; index < std::ceil(high_candidates.size()*(1-config.ml_pruning)); ++index) {
-        auto node = high_candidates[index];
-        if (status.node_status[reverse_mapping[node]] == IS_status::not_set) {
-            // force high confidence nodes into IS
-            br_alg->set(reverse_mapping[node], IS_status::included);
-            // and exclude all it's neighbors
-            forall_out_edges(G, edge, node) {
-                NodeID neighbor = G.getEdgeTarget(node);
-                if (status.node_status[reverse_mapping[node]] == IS_status::not_set) {
-                    br_alg->set(reverse_mapping[neighbor], IS_status::excluded);
-                }
-            } endfor
-        }
-    }
+    // for(size_t index = 0; index < std::ceil(high_candidates.size()*(1-config.ml_pruning)); ++index) {
+    //     auto node = high_candidates[index];
+    //     if (status.node_status[reverse_mapping[node]] == IS_status::not_set) {
+    //         // force high confidence nodes into IS
+    //         br_alg->set(reverse_mapping[node], IS_status::included);
+    //         // and exclude all it's neighbors
+    //         forall_out_edges(G, edge, node) {
+    //             NodeID neighbor = G.getEdgeTarget(node);
+    //             if (status.node_status[reverse_mapping[node]] == IS_status::not_set) {
+    //                 br_alg->set(reverse_mapping[neighbor], IS_status::excluded);
+    //             }
+    //         } endfor
+    //     }
+    // }
 
     // remove lower (1-q)% nodes
     for(size_t index = std::floor(high_candidates.size()*(config.ml_pruning)); index < high_candidates.size(); ++index) {

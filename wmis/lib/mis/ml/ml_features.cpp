@@ -43,6 +43,7 @@ void ml_assign_weights(graph_access& G, const MISConfig& mis_config) {
 ml_features::ml_features(const MISConfig& config)
     : has_labels {true}
 {
+    std::cout << "FEATURE_NUM " << FEATURE_NUM << std::endl;
     configuration_mis cfg;
     cfg.standard(mis_config);
     mis_config.console_log = config.console_log;
