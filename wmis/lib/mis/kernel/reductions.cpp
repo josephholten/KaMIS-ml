@@ -1246,6 +1246,6 @@ bool greedy_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
 
     // br_alg->set(reverse_mapping[max_node], IS_status::excluded);
 
-    std::cout << "remaining " << status.remaining_nodes << std::endl;
+    std::cout << "remaining " << status.remaining_nodes << ", marker " << marker.current_size() << std::endl;
     return oldn != status.remaining_nodes;
 }
