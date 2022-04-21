@@ -1187,31 +1187,65 @@ void ml_reduction::apply(branch_and_reduce_algorithm *br_alg) {
 
 bool greedy_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
     auto &status = br_alg->status;
-    if (status.remaining_nodes <= 1)
-        return false;
+    auto oldn = status.remaining_nodes;
+    auto invalid = std::numeric_limits<NodeID>::max();
 
-    // current (kamis-reduced) graph
-    graph_access G;
-    // from new NodeID's to old
-    std::vector<NodeID> reverse_mapping(br_alg->get_remaining_nodes(), -1);
-    br_alg->build_graph_access(G, reverse_mapping);
+    if (marker.current_size() == 1) {
+        NodeID v = marker.current_vertex(0);
+        if (status.node_status[v] == IS_status::not_set)
+            br_alg->set(v, IS_status::included);
+    }
 
-    NodeID max_node = 0;
-    long max_value = std::numeric_limits<long>::lowest();
+    if (marker.current_size() > 1) {
+        NodeID max_node = invalid;
+        long max_value = std::numeric_limits<long>::lowest();
 
-    forall_nodes(G, node) {
-        long ht = 0;
-        forall_out_edges(G, edge, node) {
-             ht += G.getNodeWeight(G.getEdgeTarget(edge));
-        } endfor
-        ht -= status.weights[node];
+        for (size_t v_idx = 0; v_idx < marker.current_size(); v_idx++) {
+            NodeID v = marker.current_vertex(v_idx);
 
-        if (ht > max_value) {
-            max_node = node;
-            max_value = ht;
+            if (status.node_status[v] == IS_status::not_set) {
+                long ht = 0;
+                for (auto neighbor : status.graph[v])
+                     ht += status.weights[neighbor];
+                ht -= status.weights[v];
+
+                if (ht > max_value) {
+                    max_node = v;
+                    max_value = ht;
+                }
+            }
         }
-    } endfor
 
-    br_alg->set(reverse_mapping[max_node], IS_status::excluded);
-    return true;
+        if (max_node != invalid) {
+            br_alg->set(max_node, IS_status::excluded);
+        }
+
+    }
+
+
+              // current (kamis-reduced) graph
+    // graph_access G;
+    // // from new NodeID's to old
+    // std::vector<NodeID> reverse_mapping(br_alg->get_remaining_nodes(), -1);
+    // br_alg->build_graph_access(G, reverse_mapping);
+
+
+    // forall_nodes(G, node) {
+    //     long ht = 0;
+    //     forall_out_edges(G, edge, node) {
+    //          ht += G.getNodeWeight(G.getEdgeTarget(edge));
+    //     } endfor
+    //     ht -= status.weights[node];
+
+    //     if (ht > max_value) {
+    //         max_node = node;
+    //         max_value = ht;
+    //     }
+    // } endfor
+
+
+    // br_alg->set(reverse_mapping[max_node], IS_status::excluded);
+
+    std::cout << "remaining " << status.remaining_nodes << std::endl;
+    return oldn != status.remaining_nodes;
 }
