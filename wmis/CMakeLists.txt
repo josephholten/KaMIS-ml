@@ -36,6 +36,11 @@ if(COMPILER_SUPPORTS_FUNROLL_LOOPS)
   add_definitions(-funroll-loops)
 endif()
 
+if(FEATURE_SET)
+    add_compile_definitions(FEATURE_SET=${FEATURE_SET})
+    message("Using " ${FEATURE_SET} " feature set")
+endif()
+
 add_compile_definitions(MODEL_DIR="${CMAKE_SOURCE_DIR}/models")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
