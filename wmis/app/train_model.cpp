@@ -72,7 +72,7 @@ int main(int argn, char** argv) {
     safe_xgboost(XGBoosterSetParam(booster, "eval_metric", "logloss"));
 
     safe_xgboost(XGBoosterSetParam(booster, "gamma", "0.01"));
-    safe_xgboost(XGBoosterSetParam(booster, "max_depth", "5"));
+    safe_xgboost(XGBoosterSetParam(booster, "max_depth", "10"));
     safe_xgboost(XGBoosterSetParam(booster, "eta", "0.3"));
     safe_xgboost(XGBoosterSetParam(booster, "verbosity", "1"));
     safe_xgboost(XGBoosterSetParam(booster, "subsample", "0.6"));
