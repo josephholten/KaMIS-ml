@@ -169,11 +169,14 @@ private:
                 // print();
             }
 
-        } else if (o == order_t::down) {
+        } else if (o == order_t::down && !is_leaf(index)) {
             size_t top_child = get_top_child(o, index);
             while (!is_leaf(index) && order(priorities[heap[top_child]], priorities[heap[index]]) != down) {
                 swap(index, top_child);
                 index = top_child;
+
+                if (is_leaf(index))
+                    break;
                 top_child = get_top_child(o, index);
 
                 // print();
