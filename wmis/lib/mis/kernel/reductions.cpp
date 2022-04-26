@@ -1196,6 +1196,7 @@ bool greedy_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
             br_alg->set(v, IS_status::included);
     }
 
+    // currently only nodes in marker are considered, not nodes which were in the marker before, but aren't any more
     if (marker.current_size() > 1) {
         NodeID max_node = invalid;
         long max_value = std::numeric_limits<long>::lowest();
@@ -1221,30 +1222,6 @@ bool greedy_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
         }
 
     }
-
-
-              // current (kamis-reduced) graph
-    // graph_access G;
-    // // from new NodeID's to old
-    // std::vector<NodeID> reverse_mapping(br_alg->get_remaining_nodes(), -1);
-    // br_alg->build_graph_access(G, reverse_mapping);
-
-
-    // forall_nodes(G, node) {
-    //     long ht = 0;
-    //     forall_out_edges(G, edge, node) {
-    //          ht += G.getNodeWeight(G.getEdgeTarget(edge));
-    //     } endfor
-    //     ht -= status.weights[node];
-
-    //     if (ht > max_value) {
-    //         max_node = node;
-    //         max_value = ht;
-    //     }
-    // } endfor
-
-
-    // br_alg->set(reverse_mapping[max_node], IS_status::excluded);
 
     std::cout << "remaining " << status.remaining_nodes << ", marker " << marker.current_size() << std::endl;
     return oldn != status.remaining_nodes;

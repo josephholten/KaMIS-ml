@@ -272,6 +272,9 @@ struct greedy_reduction : public general_reduction {
 
     virtual reduction_type get_reduction_type() const final { return reduction_type::greedy; }
     virtual bool reduce(branch_and_reduce_algorithm* br_alg) final;
+
+private:
+
 };
 
 struct reduction_ptr {
