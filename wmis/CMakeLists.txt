@@ -209,3 +209,9 @@ target_link_libraries(assign_weights xgboost)
 
 add_executable(read_IS "app/read_IS.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
 target_link_libraries(read_IS xgboost)
+
+add_executable(simple_greedy "app/simple_greedy.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
+target_link_libraries(simple_greedy xgboost)
+
+add_executable(simple_ml "app/simple_ml.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
+target_link_libraries(simple_ml xgboost)
