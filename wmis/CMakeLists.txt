@@ -153,6 +153,8 @@ include_directories(
         extern/KaHIP/lib/tools
 
         extern/xgboost/include
+        extern/json/include
+        extern/json/single_include
 )
 
 
@@ -179,9 +181,12 @@ set(ML_SOURCES
         lib/mis/ml/weighted_ls.cpp
 )
 
-add_library(libml OBJECT ${ML_SOURCES})
-
 add_subdirectory(extern/xgboost)
+add_subdirectory(extern/json)
+
+add_library(libml OBJECT ${ML_SOURCES})
+target_link_libraries(libml nlohmann_json::nlohmann_json)
+
 
 add_executable(branch_reduce "app/branch_reduce.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
 target_link_libraries(branch_reduce xgboost)

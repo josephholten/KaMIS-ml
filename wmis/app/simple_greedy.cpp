@@ -5,6 +5,7 @@
 #include "graph_access.h"
 #include "graph_io.h"
 #include "greedy_algorithm.h"
+#include "algo_log.h"
 
 NodeWeight ht(const weighted_dynamic_graph& graph, NodeID node) {
     NodeWeight w = 0;
@@ -15,6 +16,7 @@ NodeWeight ht(const weighted_dynamic_graph& graph, NodeID node) {
 }
 
 void check_IS(graph_access& G, std::vector<IS_status> IS, NodeWeight weight) {
+    std::cout << "checking" << std::endl;
     bool res = true;
     NodeWeight true_weight = 0;
     forall_nodes(G, node) {
@@ -33,15 +35,19 @@ void check_IS(graph_access& G, std::vector<IS_status> IS, NodeWeight weight) {
 int main(int argc, char** argv) {
     // test_min_priority_queue();
 
+    algo_log logger("simple_greedy");
+
     if (argc < 2 || argc > 3) {
         std::cerr << "ERROR: Arguments: graph_filename [output_filename]" << std::endl;
         return 1;
     }
 
+    logger.instance(argv[1]);
+
     graph_access G;
     graph_io::readGraphWeighted(G, argv[1]);
 
-    greedy_algorithm<NodeWeight, priority_direction::MIN> alg(G, ht);
+    greedy_algorithm<NodeWeight, priority_direction::MIN> alg(G, ht, logger);
     alg.run();
 
     auto IS = alg.IS();
@@ -49,8 +55,12 @@ int main(int argc, char** argv) {
 
     check_IS(G, IS, weight);
 
-    std::cout << "MIS_weight " << weight << std::endl;
+    logger.solution(weight);
 
-    if (argc == 3)
+    if (argc == 3) {
         graph_io::writeVector(IS, argv[2]);
+        logger["solution_file"] = argv[2];
+    }
+
+    std::cout << std::setw(2) << logger;
 }
