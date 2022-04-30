@@ -16,7 +16,6 @@ NodeWeight ht(const weighted_dynamic_graph& graph, NodeID node) {
 }
 
 void check_IS(graph_access& G, std::vector<IS_status> IS, NodeWeight weight) {
-    std::cout << "checking" << std::endl;
     bool res = true;
     NodeWeight true_weight = 0;
     forall_nodes(G, node) {
@@ -62,5 +61,5 @@ int main(int argc, char** argv) {
         logger["solution_file"] = argv[2];
     }
 
-    std::cout << std::setw(2) << logger;
+    std::cout << std::setw(2) << logger << std::endl;
 }
