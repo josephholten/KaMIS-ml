@@ -33,12 +33,8 @@ public:
             changed.clear();
             changed_set.clear();
 
-            size_t top;
-            do {
-                top = queue.pop();
-            } while (status[top] != IS_status::not_set);
-
-            set_status(top, IS_status::included);
+            if (size_t top = queue.pop(); status[top] == IS_status::not_set)
+                set_status(top, IS_status::included);
         }
     }
 

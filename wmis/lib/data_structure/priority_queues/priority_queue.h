@@ -58,6 +58,7 @@ public:
     };
 
     size_t pop() {
+        assert(_size >= 1);
         auto min = heap.front();
         _size -= 1;
 
@@ -70,6 +71,7 @@ public:
 
     void set(size_t key, priority_t new_priority) {
         size_t index = indices[key];
+        assert(index < _size && "setting index which was removed");
 
         auto o = order(new_priority, priorities[key]);
         priorities[key] = new_priority;
@@ -169,19 +171,16 @@ private:
                 // print();
             }
 
-        } else if (o == order_t::down && !is_leaf(index)) {
-            size_t top_child = get_top_child(o, index);
-            while (!is_leaf(index) && order(priorities[heap[top_child]], priorities[heap[index]]) != down) {
+        } else if (o == order_t::down) {
+            while(!is_leaf(index)) {
+                size_t top_child = get_top_child(index);
+                if (order(priorities[heap[top_child]], priorities[heap[index]]) == down)
+                    break;
                 swap(index, top_child);
                 index = top_child;
 
-                if (is_leaf(index))
-                    break;
-                top_child = get_top_child(o, index);
-
                 // print();
             }
-
         }
     }
 
@@ -195,7 +194,7 @@ private:
         return 2*index + 1 >= _size;
     }
 
-    size_t get_top_child(order_t o, size_t index) {
+    size_t get_top_child(size_t index) {
         size_t l_child = 2*index + 1;
         size_t r_child = 2*index + 2;
 
