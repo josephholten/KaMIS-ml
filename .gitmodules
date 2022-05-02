@@ -4,3 +4,6 @@
 [submodule "wmis/extern/json"]
 	path = wmis/extern/json
 	url = https://github.com/nlohmann/json.git
+[submodule "wmis/extern/algo_test"]
+	path = wmis/extern/algo_test
+	url = https://github.com/josephholten/algo_test.git
