@@ -6,6 +6,7 @@
 #include "ils/local_search.h"
 #include "strongly_connected_components.h"
 #include "graph_extractor.h"
+#include "algo_log.h"
 
 #include <algorithm>
 #include <chrono>
@@ -589,7 +590,8 @@ bool branch_and_reduce_algorithm::run_branch_reduce() {
 
 	//std::cout << "%reduction_nodes " << global_status.remaining_nodes << "\n";
 	//std::cout << "%reduction_offset " << global_status.is_weight + global_status.reduction_offset << "\n";
-	std::cout << "reduction_time " << t.elapsed() << "\n";
+	// std::cout << "reduction_time " << t.elapsed() << "\n";
+    algo_log::logger()["reduction_time"] = t.elapsed();
 
 	if (global_status.remaining_nodes == 0) {
 		restore_best_global_solution();

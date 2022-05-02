@@ -22,6 +22,8 @@
 #include "parse_parameters.h"
 #include "branch_and_reduce_algorithm.h"
 
+#include "algo_log.h"
+
 
 bool is_IS(graph_access& G) {
         forall_nodes(G, node) {
@@ -66,6 +68,8 @@ int main(int argn, char **argv) {
         mis_log::instance()->restart_total_timer();
         //mis_log::instance()->print_title();
 
+        algo_log::logger().set_name("branch_reduce");
+        
         MISConfig mis_config;
         std::string graph_filepath;
 
@@ -89,6 +93,7 @@ int main(int argn, char **argv) {
         //std::cout << "%nodes " << G.number_of_nodes() << std::endl;
         //std::cout << "%edges " << G.number_of_edges() << std::endl;
 
+        algo_log::logger().start_timer();
         auto start = std::chrono::system_clock::now();
 
         branch_and_reduce_algorithm reducer(G, mis_config);
@@ -96,10 +101,12 @@ int main(int argn, char **argv) {
         NodeWeight MWIS_weight = reducer.get_current_is_weight();
 
         auto end = std::chrono::system_clock::now();
+        algo_log::logger().end_timer();
 
         std::chrono::duration<float> branch_reduce_time = end - start;
-        std::cout << "time " << branch_reduce_time.count() << "\n";
-        std::cout << "MIS_weight " << MWIS_weight << "\n";
+        // std::cout << "time " << branch_reduce_time.count() << "\n";
+        // std::cout << "MIS_weight " << MWIS_weight << "\n";
+        algo_log::logger().solution(MWIS_weight);
 
         reducer.apply_branch_reduce_solution(G);
 
@@ -115,10 +122,12 @@ int main(int argn, char **argv) {
                         }
                 } endfor
 
-                std::cout << "MIS_weight_check " << is_weight << std::endl;
+                assert(MIS_weight_check == MWIS_weight);
+                // std::cout << "MIS_weight_check " << is_weight << std::endl;
         }
 
         if (mis_config.write_graph) graph_io::writeIndependentSet(G, mis_config.output_filename);
 
+        std::cout << std::setw(2) << algo_log::logger() << std::endl;
         return 0;
 }

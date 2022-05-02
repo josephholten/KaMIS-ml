@@ -155,6 +155,7 @@ include_directories(
         extern/xgboost/include
         extern/json/include
         extern/json/single_include
+        extern/algo_test/
 )
 
 

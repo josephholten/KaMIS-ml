@@ -18,16 +18,14 @@ template<typename priority_t, priority_direction direction>
 class greedy_algorithm {
 public:
 
-    explicit greedy_algorithm(graph_access& G, std::function<priority_t(weighted_dynamic_graph, NodeID)> _heuristic, algo_log _logger)
+    explicit greedy_algorithm(graph_access& G, std::function<priority_t(weighted_dynamic_graph, NodeID)> _heuristic)
             : graph(G), status(G.number_of_nodes(), IS_status::not_set), queue(G.number_of_nodes()), changed(G.number_of_nodes()),
-              changed_set(G.number_of_nodes()), heuristic(_heuristic), logger(_logger)
+              changed_set(G.number_of_nodes()), heuristic(_heuristic)
     {
         std::iota(changed.begin(), changed.end(), 0);
     }
 
     void run() {
-        logger.start_timer();
-
         while(!queue.empty()) {
             // update
             for (NodeID node : changed)
@@ -39,8 +37,6 @@ public:
             if (size_t top = queue.pop(); status[top] == IS_status::not_set)
                 set_status(top, IS_status::included);
         }
-
-        logger.end_timer();
     }
 
     const std::vector<IS_status>& IS() {
@@ -58,7 +54,6 @@ private:
     std::vector<NodeID> changed;
     fast_set changed_set;
     NodeWeight is_weight = 0;
-    algo_log logger;
 
     std::function<priority_t(weighted_dynamic_graph, NodeID)> heuristic;
 

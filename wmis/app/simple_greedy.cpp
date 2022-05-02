@@ -33,33 +33,36 @@ void check_IS(graph_access& G, std::vector<IS_status> IS, NodeWeight weight) {
 
 int main(int argc, char** argv) {
     // test_min_priority_queue();
-
-    algo_log logger("simple_greedy");
+    algo_log::logger().set_name("simple_greedy");
 
     if (argc < 2 || argc > 3) {
         std::cerr << "ERROR: Arguments: graph_filename [output_filename]" << std::endl;
         return 1;
     }
 
-    logger.instance(argv[1]);
+    algo_log::logger().instance(argv[1]);
 
     graph_access G;
     graph_io::readGraphWeighted(G, argv[1]);
 
-    greedy_algorithm<NodeWeight, priority_direction::MIN> alg(G, ht, logger);
+    greedy_algorithm<NodeWeight, priority_direction::MIN> alg(G, ht);
+
+
+    algo_log::logger().start_timer();
     alg.run();
+    algo_log::logger().end_timer();
 
     auto IS = alg.IS();
     auto weight = alg.getISWeight();
 
     check_IS(G, IS, weight);
 
-    logger.solution(weight);
+    algo_log::logger().solution(weight);
 
     if (argc == 3) {
         graph_io::writeVector(IS, argv[2]);
-        logger["solution_file"] = argv[2];
+        algo_log::logger()["solution_file"] = argv[2];
     }
 
-    std::cout << std::setw(2) << logger << std::endl;
+    std::cout << std::setw(2) << algo_log::logger() << std::endl;
 }
