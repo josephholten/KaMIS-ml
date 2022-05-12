@@ -122,7 +122,7 @@ int main(int argn, char **argv) {
                         }
                 } endfor
 
-                assert(MIS_weight_check == MWIS_weight);
+                assert(is_weight == MWIS_weight);
                 // std::cout << "MIS_weight_check " << is_weight << std::endl;
         }
 
