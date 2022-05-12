@@ -210,8 +210,9 @@ class graph_access {
 
                 int build_from_metis(int n, int* xadj, int* adjncy);
                 int build_from_metis_weighted(int n, int* xadj, int* adjncy, int * vwgt, int* adjwgt);
+                int build_from_metis(const std::vector<NodeID>& start, const std::vector<EdgeID>& edges);
 
-                //void set_node_queue_index(NodeID node, Count queue_index); 
+    //void set_node_queue_index(NodeID node, Count queue_index);
                 //Count get_node_queue_index(NodeID node);
 
                 void copy(graph_access & Gcopy);
@@ -467,7 +468,7 @@ inline int graph_access::build_from_metis(int n, int* xadj, int* adjncy) {
 }
 
 inline int graph_access::build_from_metis_weighted(int n, int* xadj, int* adjncy, int * vwgt, int* adjwgt) {
-        graphref = new basicGraph();
+    graphref = new basicGraph();
         start_construction(n, xadj[n]);
 
         for( unsigned i = 0; i < (unsigned)n; i++) {
@@ -483,6 +484,27 @@ inline int graph_access::build_from_metis_weighted(int n, int* xadj, int* adjncy
         
         finish_construction();
         return 0;
+}
+
+inline int graph_access::build_from_metis(const std::vector<NodeID>& start, const std::vector<EdgeID>& edges) {
+    graphref = new basicGraph();
+
+    auto n = start.size() - 1;
+    start_construction(n, start.back());
+
+    for( unsigned i = 0; i < (unsigned)n; i++) {
+        NodeID node = new_node();
+        setNodeWeight(node, 1);
+        setPartitionIndex(node, 0);
+
+        for( unsigned e = start[i]; e < start[i+1]; e++) {
+            EdgeID e_bar = new_edge(node, edges[e]);
+            setEdgeWeight(e_bar, 1);
+        }
+    }
+
+    finish_construction();
+    return 0;
 }
 
 inline void graph_access::copy(graph_access & G_bar) {

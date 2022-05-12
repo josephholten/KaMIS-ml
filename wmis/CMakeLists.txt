@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
     message(Debug build)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -fPIC -O0")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -fPIC -O0 -fsanitize=address -fsanitize=leak")
 endif(CMAKE_BUILD_TYPE STREQUAL Debug)
 
 if (CMAKE_BUILD_TYPE STREQUAL Release)
@@ -221,3 +221,9 @@ target_link_libraries(simple_greedy xgboost)
 
 add_executable(simple_ml "app/simple_ml.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
 target_link_libraries(simple_ml xgboost)
+
+add_executable(metis_to_dot "app/metis_to_dot.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
+target_link_libraries(metis_to_dot xgboost)
+
+add_executable(gen_synthetics "app/gen_synthetics.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
+target_link_libraries(gen_synthetics xgboost)
