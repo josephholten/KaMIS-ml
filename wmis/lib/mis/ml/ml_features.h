@@ -11,6 +11,9 @@
 #include "graph_access.h"
 #include "safe_c_api.h"
 #include "feature_set_macros.h"
+#include "weighted_dynamic_graph.h"
+
+class weighted_dynamic_graph;
 
 class ml_features {
 private:
@@ -68,6 +71,7 @@ private:
 public:
     static constexpr int FEATURE_NUM = FEATURE_NUM_ENUM;
 
+    explicit ml_features(const MISConfig& config, const weighted_dynamic_graph &G, const std::vector<NodeID> &nodes);
     explicit ml_features(const MISConfig& config, graph_access& G);   // for single graph
     explicit ml_features(const MISConfig& config);    // for multiple graphs
     ~ml_features();
@@ -80,6 +84,7 @@ public:
 
     void reserveNodes(NodeID n);   // for reserving memory
     void fillGraph(graph_access& G);
+    void fillGraph(const weighted_dynamic_graph& G, const std::vector<NodeID>& nodes);
     void fillGraph(graph_access& G, std::vector<float>& labels, NodeID offset);
 
     void initDMatrix();
@@ -102,7 +107,8 @@ private:
     inline float* c_arr(const matrix& m) { return feature_matrix[0].data(); };
     std::vector<float> label_data;
 
-    void calculate_features(graph_access& G);
+    void calculate_features(graph_access &G);
+    void calculate_features(const weighted_dynamic_graph &G, const std::vector<NodeID> &nodes);
 
     template<feature f>
     float& get_feature(NodeID node) {

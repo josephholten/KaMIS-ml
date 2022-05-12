@@ -16,7 +16,7 @@
 // Configuration for the calculation of the MIS
 struct MISConfig {
     enum Weight_Source {FILE, HYBRID, UNIFORM, GEOMETRIC};
-    enum Reduction_Style {NORMAL, DENSE, ML, GREEDY};
+    enum Reduction_Style {NORMAL, DENSE, ML, GREEDY, SIMPLE_ML};
 
     // Name of the graph file.
     std::string graph_filename;

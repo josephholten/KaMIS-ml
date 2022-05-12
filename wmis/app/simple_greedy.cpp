@@ -5,15 +5,28 @@
 #include "graph_access.h"
 #include "graph_io.h"
 #include "greedy_algorithm.h"
-#include "algo_log.h"
+#include "ml_features.h"
+#include "extern/algo_test/algo_log.h"
 
-NodeWeight ht(const weighted_dynamic_graph& graph, NodeID node) {
-    NodeWeight w = 0;
-    for (auto neighbor : graph[node])
-        w += graph.getNodeWeight(neighbor);
-    w -= graph.getNodeWeight(node);
-    return w;
-}
+class ht_heuristic {
+public:
+    typedef NodeWeight priority_t;
+    static const priority_direction direction = priority_direction::MIN;
+
+    template<typename Function>
+    void updateMany(const weighted_dynamic_graph& graph, const std::vector<NodeID>& nodes, Function update) {
+        for (auto node : nodes)
+            update(node, eval(graph, node));
+    }
+
+    static NodeWeight eval(weighted_dynamic_graph graph, NodeID node) {
+        NodeWeight w = 0;
+        for (auto neighbor : graph[node])
+            w += graph.getNodeWeight(neighbor);
+        w -= graph.getNodeWeight(node);
+        return w;
+    }
+};
 
 void check_IS(graph_access& G, std::vector<IS_status> IS, NodeWeight weight) {
     bool res = true;
@@ -45,7 +58,7 @@ int main(int argc, char** argv) {
     graph_access G;
     graph_io::readGraphWeighted(G, argv[1]);
 
-    greedy_algorithm<NodeWeight, priority_direction::MIN> alg(G, ht);
+    greedy_algorithm<ht_heuristic> alg(G);
 
 
     algo_log::logger().start_timer();

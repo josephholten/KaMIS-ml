@@ -44,7 +44,7 @@ public:
 		size_t counter = 0;
 	};
 
-	weighted_dynamic_graph(size_t nodes = 0) : graph(nodes) { graph.reserve(nodes); }
+	weighted_dynamic_graph(size_t nodes = 0) : graph(nodes), edges(0) { graph.reserve(nodes); weights.reserve(nodes);  }
 
 	weighted_dynamic_graph(graph_access& G) : graph(G.number_of_nodes()), weights(G.number_of_nodes()) {
 		neighbor_list* slot;
@@ -53,6 +53,7 @@ public:
 			slot = &graph[node];
 			slot->resize(G.getNodeDegree(node));
             weights[node] = G.getNodeWeight(node);
+            edges += G.getNodeDegree(node);
 
 			forall_out_edges(G, edge, node) {
 				slot->neighbors[slot->counter++] = G.getEdgeTarget(edge);
@@ -98,6 +99,7 @@ public:
 		for (size_t pos = 0; pos < slot.counter; pos++) {
 			if (slot.neighbors[pos] == target) {
 				std::swap(slot.neighbors[pos], slot.neighbors[--slot.counter]);
+                edges--;
 				return;
 			}
 		}
@@ -113,6 +115,7 @@ public:
 	// restores last hidden edge starting from node
 	void restore_edge(NodeID node) {
 		graph[node].counter++;
+        edges++;
 	}
 
 	// replaces the last target of the restored edge of node
@@ -132,10 +135,14 @@ public:
 	const neighbor_list& operator[] (NodeID node) const { return graph[node]; }
 
     [[nodiscard]] NodeWeight getNodeWeight(NodeID node) const { return weights[node]; };
+    NodeID number_of_nodes() const { return graph.size(); }
+    EdgeID number_of_edges() const { return edges; }
+    EdgeWeight getNodeDegree(NodeID node) const { return graph[node].size(); }
 
 private:
 	std::vector<neighbor_list> graph;
     std::vector<NodeWeight> weights;
+    EdgeID edges = 0;
 };
 
 #endif 

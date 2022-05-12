@@ -1141,6 +1141,13 @@ bool ml_reduction::reduce(branch_and_reduce_algorithm* br_alg) {
     //     q = (q-min_change) * 0.95f;
     // }
 
+    if (config.reduction_style == MISConfig::SIMPLE_ML) {
+        auto max = std::max_element(prediction.begin(), prediction.end());
+        auto node = max - prediction.begin();
+        br_alg->set(reverse_mapping[node], IS_status::included);
+        return true;
+    }
+
     // sort nodes by their prediction
     std::vector<NodeID> high_candidates = std::vector<NodeID>(G.number_of_nodes(), 0);
     std::iota(high_candidates.begin(), high_candidates.end(), 0);

@@ -13,6 +13,7 @@
 #include "graph_io.h"
 #include "weighted_ls.h"
 #include "stat.h"
+#include "weighted_dynamic_graph.h"
 
 void ml_assign_weights(graph_access& G, const MISConfig& mis_config) {
     constexpr NodeWeight MAX_WEIGHT = 200;
@@ -65,6 +66,21 @@ ml_features::ml_features(const MISConfig& config, graph_access &G)
     mis_config.ls_rounds = config.ls_rounds;
     reserveNodes(G.number_of_nodes());
     fillGraph(G);
+}
+
+// for reducing (single graph without labels)
+ml_features::ml_features(const MISConfig& config, const weighted_dynamic_graph &G, const std::vector<NodeID>& nodes)
+        : has_labels {false}
+{
+    configuration_mis cfg;
+    cfg.standard(mis_config);
+    mis_config.console_log = config.console_log;
+    mis_config.ls_updates = config.ls_updates;
+    mis_config.ml_pruning = config.ml_pruning;
+    mis_config.time_limit = config.ls_time;
+    mis_config.ls_rounds = config.ls_rounds;
+    reserveNodes(nodes.size());
+    fillGraph(G, nodes);
 }
 
 ml_features::~ml_features() {
@@ -122,6 +138,14 @@ void ml_features::fillGraph(graph_access& G) {
     calculate_features(G);
 }
 
+void ml_features::fillGraph(const weighted_dynamic_graph& G, const std::vector<NodeID>& nodes) {
+    if (has_labels) {
+        std::cerr << "Error: feature matrix was constructed for labels, so provide the labels for the graph.\n";
+        exit(1);
+    }
+    calculate_features(G, nodes);
+}
+
 void ml_features::fillGraph(graph_access& G, std::vector<float>& labels, NodeID offset) {
     if (!has_labels) {
         std::cerr << "Error: feature matrix was constructed not for labels, so the labels will be discarded.\n";
@@ -129,8 +153,6 @@ void ml_features::fillGraph(graph_access& G, std::vector<float>& labels, NodeID 
     calculate_features(G);
     std::copy(labels.begin(), labels.end(), label_data.begin() + offset);
 }
-
-
 
 void ml_features::calculate_features(graph_access& G) {
     // precompute values
@@ -330,7 +352,7 @@ void ml_features::calculate_features(graph_access& G) {
 #ifdef F_AVG_CHI2_DEG
         float avg_chi2_deg = 0;
         forall_out_edges(G, edge, node) {
-            avg_chi2_deg += get_feature<AVG_CHI2_DEG>(node);
+            avg_chi2_deg += get_feature<AVG_CHI2_DEG>(G.getEdgeTarget(edge));
         } endfor
 
         if(G.getNodeDegree(node) > 0)    // catch divide by zero
@@ -345,6 +367,222 @@ void ml_features::calculate_features(graph_access& G) {
         get_feature<CHI2_W_DEG>(node) = (float) chi2(get_feature<W_DEG>(node), avg_wdeg);
 #endif
     } endfor
+
+    current_size += G.number_of_nodes();
+}
+
+
+void ml_features::calculate_features(const weighted_dynamic_graph& G, const std::vector<NodeID>& nodes) {
+    // precompute values
+
+    NodeWeight total_weight = 0;
+    NodeWeight min_weight = std::numeric_limits<NodeWeight>::max();
+
+    NodeWeight max_weight = std::numeric_limits<NodeWeight>::min();
+
+    // greedy node coloring
+    std::vector<int> node_coloring(G.number_of_nodes());
+    std::vector<bool> available(G.number_of_nodes(), true);
+
+    for (auto node : nodes) {
+                NodeWeight weight = G.getNodeWeight(node);
+
+#ifdef F_T_WEIGHT
+                total_weight += weight;
+#endif
+#ifdef F_MIN_W
+                min_weight = std::min(weight, min_weight);
+#endif
+#ifdef F_MAX_W
+                max_weight = std::max(weight, max_weight);
+#endif
+#ifdef F_CHROMATIC
+                std::fill(available.begin(), available.end(), true);
+                for (auto neighbor : G[node])
+                    available[node_coloring[neighbor]] = false;
+                node_coloring[node] = (int) (std::find_if(available.begin(), available.end(), [](bool x){ return x; }) - available.begin());
+#endif
+
+            }
+
+#ifdef F_CHROMATIC
+    int greedy_chromatic_number = *std::max_element(node_coloring.begin(), node_coloring.end()) + 1;
+    std::vector<bool> used_colors(greedy_chromatic_number);
+#endif
+
+#ifdef F_LS
+    // local search
+    std::vector<int> ls_signal(G.number_of_nodes(), 0);
+    std::random_device rd;
+
+    for (int round = 0; round < mis_config.ls_rounds; ++round) {
+        // TODO: only reduce the graph once, then perform the LS rounds with different seeds
+        mis_config.seed = (int) rd();
+        std::cout << "ls_round " << round << std::endl;
+        weighted_ls ls(mis_config, G);
+        ls.run_ils();
+        forall_nodes(G, node) {
+            ls_signal[node] += (int) G.getPartitionIndex(node);
+        } endfor
+    }
+
+    if (mis_config.console_log) {
+        // int count = 0;
+        double mean = 0;
+        double std_dev = 0;
+        for (const auto& val : ls_signal) {
+            if (val != 0) {
+                mean += val;
+                ++count;
+            }
+        }
+        mean /= count;
+        for (const auto& val : ls_signal) {
+            if (val != 0) {
+                std_dev += (mean - val) * (mean - val);
+            }
+        }
+        std_dev /= count;
+
+        std::cout << "ls_std_dev " << std_dev << std::endl;
+    }
+#endif
+
+    // loop variables
+    EdgeID local_edges = 0;
+    std::unordered_set<NodeID> neighbors {};      // don't know how to do faster? maybe using bitset from boost?
+    size_t max_deg = 0;
+    for (auto node : nodes)
+        max_deg = std::max(max_deg, G[node].size());
+    neighbors.reserve(max_deg);
+    float avg_lcc = 0;
+    float avg_wdeg = 0;
+
+    for (auto node : nodes) {
+        // num of nodes/ edges, deg
+#ifdef F_NODES
+        get_feature<NODES>(node) = (float) G.number_of_nodes();
+#endif
+#ifdef F_EDGES
+        get_feature<EDGES>(node) = (float) G.number_of_edges();
+#endif
+#ifdef F_DEG
+        get_feature<DEG>(node) = (float) G.getNodeDegree(node);
+#endif
+#ifdef F_LCC
+        // lcc
+        for (auto neighbor : G[node])
+                neighbors.insert(neighbor);
+        for (auto& neighbor : neighbors) {
+            for (auto neighbors_neighbor : G[neighbor]) {
+                if (neighbors.find(neighbors_neighbor) != neighbors.end())
+                    ++local_edges;
+            }
+        }
+        neighbors.clear();
+
+        if (G.getNodeDegree(node) > 1)  // catch divide by zero
+            get_feature<LCC>(node) = ((float) local_edges) / ((float) (G.getNodeDegree(node) * (G.getNodeDegree(node) - 1)));
+        else
+            get_feature<LCC>(node) = 0;
+        avg_lcc += get_feature<LCC>(node);
+#endif
+
+                // local chromatic density and maximum weight in neighborhood
+                NodeWeight max_neighborhood_weight = std::numeric_limits<NodeWeight>::min();
+                NodeWeight sum_neighborhood_weight = 0;
+
+                for (auto neighbor : G[node]) {
+#ifdef F_CHROMATIC
+                            used_colors[node_coloring[neighbor]] = true;
+#endif
+
+#ifdef F_MAX_NEIGHBORHOOD_W
+                            max_neighborhood_weight = std::max(max_neighborhood_weight, G.getNodeWeight(neighbor));
+#endif
+
+#ifdef F_W_DEG
+                            sum_neighborhood_weight += G.getNodeWeight(neighbor);
+#endif
+
+                        }
+
+#ifdef F_CHROMATIC
+                get_feature<CHROMATIC>(node) = (float) std::accumulate(used_colors.begin(), used_colors.end(), 0) / (float) greedy_chromatic_number;
+#endif
+#ifdef F_MAX_NEIGHBORHOOD_W
+                get_feature<MAX_NEIGHBORHOOD_W>(node) = max_neighborhood_weight;
+#endif
+#ifdef F_HT
+                get_feature<HT>(node) = sum_neighborhood_weight - G.getNodeWeight(node);
+#endif
+#ifdef F_T_WEIGHT
+                // total weight
+                get_feature<T_WEIGHT>(node) = (float) total_weight;
+#endif
+
+#ifdef F_NODE_W
+                // node weight
+                get_feature<NODE_W>(node) = (float) G.getNodeWeight(node);
+#endif
+
+#ifdef F_W_DEG
+                // node weighted degree
+                for (auto neighbor : G[node]) {
+                    get_feature<W_DEG>(node) += (float) G.getNodeWeight(neighbor);
+                }
+#endif
+#ifdef F_CHI2_W_DEG
+                avg_wdeg = get_feature<W_DEG>(node);
+#endif
+#ifdef F_LS
+                // local search
+        get_feature<LOCAL_SEARCH>(node) += (float) ls_signal[node] / mis_config.ls_rounds;
+#endif
+
+                // minimum and maximum overall weight
+#ifdef F_MAX_W
+                get_feature<MAX_W>(node) = max_weight;
+#endif
+#ifdef F_MIN_W
+                get_feature<MIN_W>(node) = min_weight;
+#endif
+            }
+
+#ifdef F_CHI2_LCC
+    avg_lcc /= (float) G.number_of_nodes();
+#endif
+#ifdef F_CHI2_W_DEG
+    avg_wdeg /= (float) G.number_of_nodes();
+#endif
+
+    // statistical features
+#ifdef F_AVG_CHI2_DEG
+    float avg_deg = (2 * (float) G.number_of_edges()) / ((float) G.number_of_nodes());
+#endif
+
+    for (auto node : nodes) {
+#ifdef F_CHI2_DEG
+                get_feature<CHI2_DEG>(node) = (float) chi2(G.getNodeDegree(node), avg_deg);
+#endif
+
+#ifdef F_AVG_CHI2_DEG
+                float avg_chi2_deg = 0;
+                for (auto neighbor : G[node])
+                    avg_chi2_deg += get_feature<AVG_CHI2_DEG>(neighbor);
+
+                if(G.getNodeDegree(node) > 0)    // catch divide by zero
+                    get_feature<AVG_CHI2_DEG>(node) = avg_chi2_deg / (float) G.getNodeDegree(node);
+                else
+                    get_feature<AVG_CHI2_DEG>(node) = 0;
+#endif
+#ifdef F_CHI2_LCC
+                get_feature<CHI2_LCC>(node) = (float) chi2(get_feature<LCC>(node), avg_lcc);
+#endif
+#ifdef F_CHI2_W_DEG
+                get_feature<CHI2_W_DEG>(node) = (float) chi2(get_feature<W_DEG>(node), avg_wdeg);
+#endif
+    }
 
     current_size += G.number_of_nodes();
 }

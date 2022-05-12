@@ -10,17 +10,19 @@
 #include "graph_io.h"
 #include "fast_set.h"
 #include "weighted_dynamic_graph.h"
-#include "algo_log.h"
+#include "extern/algo_test/algo_log.h"
 
 enum IS_status { included = 1, excluded = 0, not_set = -1};
 
-template<typename priority_t, priority_direction direction>
+template<typename Heuristic>
 class greedy_algorithm {
 public:
+    using priority_t = typename Heuristic::priority_t;
+    static const priority_direction direction = Heuristic::direction;
 
-    explicit greedy_algorithm(graph_access& G, std::function<priority_t(weighted_dynamic_graph, NodeID)> _heuristic)
+    explicit greedy_algorithm(graph_access& G)
             : graph(G), status(G.number_of_nodes(), IS_status::not_set), queue(G.number_of_nodes()), changed(G.number_of_nodes()),
-              changed_set(G.number_of_nodes()), heuristic(_heuristic)
+              changed_set(G.number_of_nodes()), heuristic()
     {
         std::iota(changed.begin(), changed.end(), 0);
     }
@@ -28,8 +30,7 @@ public:
     void run() {
         while(!queue.empty()) {
             // update
-            for (NodeID node : changed)
-                queue.set(node, heuristic(graph, node));
+            heuristic.updateMany(graph, changed, [&](NodeID node, priority_t new_priority){ queue.set(node, new_priority); });
 
             changed.clear();
             changed_set.clear();
@@ -54,8 +55,7 @@ private:
     std::vector<NodeID> changed;
     fast_set changed_set;
     NodeWeight is_weight = 0;
-
-    std::function<priority_t(weighted_dynamic_graph, NodeID)> heuristic;
+    Heuristic heuristic;
 
     void set_status(NodeID node, IS_status is_status) {
         status[node] = is_status;
