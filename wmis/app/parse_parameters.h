@@ -120,6 +120,10 @@ int parse_parameters(int argn, char **argv,
 
     if (output->count > 0) {
         mis_config.output_filename = output->sval[0];
+
+        std::ofstream graph_file(mis_config.output_filename);
+        assert(graph_file.is_open() && "provide a valid output path!");
+
         mis_config.write_graph = true;
     } else {
         mis_config.write_graph = false;
