@@ -82,6 +82,12 @@ int main(int argn, char **argv) {
         mis_config.graph_filename = graph_filepath.substr(graph_filepath.find_last_of('/') + 1);
         mis_log::instance()->set_config(mis_config);
 
+        // test correctness of output path
+        if (mis_config.write_graph) {
+            std::ifstream file(mis_config.output_filename);
+            assert(file.is_open());
+        }
+
         // Read the graph
         graph_access G;
         std::string comments;
