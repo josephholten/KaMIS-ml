@@ -56,10 +56,10 @@ struct synth_config {
     }
 
     void serialize(std::ofstream& file) {
-        file << "# max_size " << max_size << std::endl;
-        file << "# max_weight " << max_weight << std::endl;
-        file << "# bias " << bias << std::endl;
-        file << "# weight_source " << weight_source_to_str.at(source) << std::endl;
+        file << "% max_size " << max_size << std::endl;
+        file << "% max_weight " << max_weight << std::endl;
+        file << "% bias " << bias << std::endl;
+        file << "% weight_source " << weight_source_to_str.at(source) << std::endl;
     }
 };
 
