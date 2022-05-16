@@ -11,7 +11,7 @@
 #include "parse_parameters_synthetics.h"
 #include "random_functions.h"
 
-void assign_weights(graph_access& G, const synth_config& config) {
+void assign_weights(graph_access& G, const synth_config& config, std::default_random_engine& generator) {
     NodeWeight MAX_WEIGHT = std::min(200u, config.max_weight);
 
     if (config.source == synth_config::weight_source::HYBRID) {
@@ -19,14 +19,13 @@ void assign_weights(graph_access& G, const synth_config& config) {
             G.setNodeWeight(node, (node + 1) % MAX_WEIGHT + 1);
         } endfor
     } else if (config.source == synth_config::weight_source::UNIFORM) {
-        std::default_random_engine generator(config.seed);
         std::uniform_int_distribution<NodeWeight> distribution(1,MAX_WEIGHT);
 
         forall_nodes(G, node) {
             G.setNodeWeight(node, distribution(generator));
         } endfor
     } else if (config.source == synth_config::weight_source::GEOMETRIC) {
-        std::default_random_engine generator(config.seed);
+        MAX_WEIGHT = std::max(2u,MAX_WEIGHT);
         std::binomial_distribution<NodeWeight> distribution(MAX_WEIGHT / 2);
 
         forall_nodes(G, node) {
@@ -35,7 +34,7 @@ void assign_weights(graph_access& G, const synth_config& config) {
     }
 }
 
-void gen_graph(graph_access& G, graph_family family, const synth_config& config) {
+void gen_graph(graph_access& G, graph_family family, const synth_config& config, std::default_random_engine& generator) {
     size_t n = random_functions::nextInt(config.max_size, config.max_size);
     size_t m;
 
@@ -92,7 +91,8 @@ void gen_graph(graph_access& G, graph_family family, const synth_config& config)
         std::vector<std::vector<NodeID>> adj(1);
 
         while (remaining > 0) {
-            auto degree = random_functions::nextInt(1, remaining / 2);
+            std::uniform_int_distribution<NodeWeight> distribution(1,remaining);
+            auto degree = distribution(generator);
             remaining -= 2*degree;
 
             // adj contains vectors for each created node, neighbor is next
@@ -119,7 +119,7 @@ void gen_graph(graph_access& G, graph_family family, const synth_config& config)
     }
 
     G.build_from_metis(start, edges);
-    assign_weights(G, config);
+    assign_weights(G, config, generator);
 }
 
 int main(int argc, char** argv) {
@@ -133,10 +133,11 @@ int main(int argc, char** argv) {
     }
 
     graph_access G;
+    std::default_random_engine generator(config.seed);
 
     for (auto type : config.types) {
         for (int i = 0; i < config.instances; ++i) {
-            gen_graph(G, type, config);
+            gen_graph(G, type, config, generator);
             std::stringstream ss;
             ss << path << "/" << family_to_str.at(type) << i << ".graph";
             std::ofstream file(ss.str());
