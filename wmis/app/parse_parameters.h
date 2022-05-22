@@ -8,6 +8,7 @@
 #define _PARSE_PARAMETERS_H_
 
 #include <omp.h>
+#include "argtable3.h"
 
 #include "configuration_mis.h"
 
