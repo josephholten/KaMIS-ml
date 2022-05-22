@@ -10,6 +10,7 @@
 #include "graph_io.h"
 #include "parse_parameters_synthetics.h"
 #include "random_functions.h"
+#include "util.h"
 
 void assign_weights(graph_access& G, const synth_config& config, std::default_random_engine& generator) {
     NodeWeight MAX_WEIGHT = std::min(200u, config.max_weight);
@@ -126,14 +127,7 @@ int main(int argc, char** argv) {
     synth_config config;
     std::string path;
     parse_parameters(argc, argv, config, path);
-
-    {
-        std::ifstream file(path + "/test");
-        if (!file.is_open()) {
-            std::perror("ERROR: invalid path");
-            std::exit(1);
-        }
-    }
+    validate_path(path + "/test");
 
     graph_access G;
     std::default_random_engine generator(config.seed);

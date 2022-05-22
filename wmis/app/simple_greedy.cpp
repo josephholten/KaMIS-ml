@@ -7,6 +7,7 @@
 #include "greedy_algorithm.h"
 #include "ml_features.h"
 #include "extern/algo_test/algo_log.h"
+#include "util.h"
 
 class ht_heuristic {
 public:
@@ -58,8 +59,10 @@ int main(int argc, char** argv) {
     graph_access G;
     graph_io::readGraphWeighted(G, argv[1]);
 
-    greedy_algorithm<ht_heuristic> alg(G);
+    if (argc == 3)
+        validate_path(argv[2]);
 
+    greedy_algorithm<ht_heuristic> alg(G);
 
     algo_log::logger().start_timer();
     alg.run();

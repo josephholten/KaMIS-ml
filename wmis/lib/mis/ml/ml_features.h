@@ -9,7 +9,7 @@
 #include <mis_config.h>
 
 #include "graph_access.h"
-#include "safe_c_api.h"
+#include "util.h"
 #include "feature_set_macros.h"
 #include "weighted_dynamic_graph.h"
 

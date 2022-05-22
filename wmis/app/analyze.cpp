@@ -5,7 +5,7 @@
 #include <graph_access.h>
 #include <graph_io.h>
 #include <xgboost/c_api.h>
-#include <safe_c_api.h>
+#include <util.h>
 #include <sstream>
 
 bool strCompare(const std::string & str1, const std::string & str2) {

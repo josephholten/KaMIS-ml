@@ -60,6 +60,8 @@ struct MISConfig {
     float ml_pruning;
     // Where to load/ save the model
     std::string model;
+    //Where to save the log
+    std::string log_file;
 
 
     void setReductionStyle(const std::string & redu_style) {

@@ -15,4 +15,12 @@ if (err != 0) {                                                         \
     }                                                                    \
 }
 
+bool validate_path(std::string path, bool weak=false) {
+    //      file exists already               file does not yet exist
+    if (!std::ifstream(path).is_open() && !std::ofstream(path).is_open()) {
+        std::perror("ERROR: invalid path");
+        std::exit(1);
+    }
+}
+
 #endif //MWIS_ML_SAFE_C_API_H

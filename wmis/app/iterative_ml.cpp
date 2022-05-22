@@ -21,6 +21,7 @@
 #include "mis_config.h"
 #include "parse_parameters_ml.h"
 #include "branch_and_reduce_algorithm.h"
+#include "util.h"
 
 
 bool is_IS(graph_access& G) {
@@ -73,6 +74,10 @@ int main(int argn, char **argv) {
     if (ret_code) {
         return 0;
     }
+
+    validate_path(mis_config.model);
+    if (mis_config.write_graph)
+        validate_path(mis_config.output_filename);
 
     // always choose the machine learning reductions
     mis_config.reduction_style = MISConfig::ML;
