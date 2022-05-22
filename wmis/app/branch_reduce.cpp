@@ -72,10 +72,8 @@ int main(int argn, char **argv) {
         std::string graph_filepath;
 
         // Parse the command line parameters;
-        int ret_code = parse_parameters(argn, argv, mis_config, graph_filepath);
-        if (ret_code) {
-                return 0;
-        }
+        if (int ret_code = parse_parameters(argn, argv, mis_config, graph_filepath); ret_code)
+            return ret_code;
 
         mis_config.graph_filename = graph_filepath.substr(graph_filepath.find_last_of('/') + 1);
         if (mis_config.write_graph)
@@ -120,6 +118,5 @@ int main(int argn, char **argv) {
         if (mis_config.write_graph) graph_io::writeIndependentSet(G, mis_config.output_filename);
 
         algo_log::logger().write(mis_config.log_file);
-        std::cout << std::setw(2) << algo_log::logger() << std::endl;
         return 0;
 }

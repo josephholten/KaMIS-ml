@@ -56,7 +56,7 @@ class graph_io {
                 void writeIndependentSet(graph_access & G, std::string filename);
 
                 template<typename vectortype>
-                static void writeVector(std::vector<vectortype> & vec, const std::string & filename);
+                static void writeVector(const std::vector<vectortype> & vec, const std::string & filename);
 
                 template<typename vectortype>
                 static void readVector(std::vector<vectortype> & vec, const std::string & filename);
@@ -66,7 +66,7 @@ class graph_io {
 };
 
 template<typename vectortype>
-void graph_io::writeVector(std::vector<vectortype> & vec, const std::string & filename) {
+void graph_io::writeVector(const std::vector<vectortype> & vec, const std::string & filename) {
         std::ofstream f(filename.c_str());
         for( unsigned i = 0; i < vec.size(); ++i) {
                 f << vec[i] <<  std::endl;

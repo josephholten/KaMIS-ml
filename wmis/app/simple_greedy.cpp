@@ -8,6 +8,7 @@
 #include "ml_features.h"
 #include "extern/algo_test/algo_log.h"
 #include "util.h"
+#include "parse_parameters.h"
 
 class ht_heuristic {
 public:
@@ -49,15 +50,15 @@ int main(int argc, char** argv) {
     // test_min_priority_queue();
     algo_log::logger().set_name("simple_greedy");
 
-    if (argc < 2 || argc > 4) {
-        std::cerr << "ERROR: Arguments: graph_filename [output_filename] [log_filename]" << std::endl;
-        return 1;
-    }
+    MISConfig mis_config;
+    std::string graph_filepath;
+    if (int ret_code = parse_parameters(argc, argv, mis_config, graph_filepath); ret_code)
+        return ret_code;
 
-    algo_log::logger().instance(argv[1]);
+    algo_log::logger().instance(graph_filepath);
 
     graph_access G;
-    graph_io::readGraphWeighted(G, argv[1]);
+    graph_io::readGraphWeighted(G, graph_filepath);
 
     if (argc == 3)
         validate_path(argv[2]);
@@ -70,15 +71,15 @@ int main(int argc, char** argv) {
     alg.run();
     algo_log::logger().end_timer();
 
-    auto IS = alg.IS();
+    const auto& IS = alg.IS();
     auto weight = alg.getISWeight();
 
     check_IS(G, IS, weight);
 
     algo_log::logger().solution(weight);
 
-    if (argc == 3) graph_io::writeVector(IS, argv[2]);
+    if (mis_config.write_graph) graph_io::writeVector(IS, mis_config.output_filename);
 
-    algo_log::logger().write(argv[3]);
-    std::cout << std::setw(2) << algo_log::logger() << std::endl;
+    algo_log::logger().write(mis_config.log_file);
+    return 0;
 }
