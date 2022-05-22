@@ -130,6 +130,7 @@ int main(int argc, char** argv) {
     {
         std::ofstream file(path + "test");
         assert(file.is_open() && "invalid path");
+        std::remove((path + "test").c_str());
     }
 
     graph_access G;
