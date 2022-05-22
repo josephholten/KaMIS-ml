@@ -123,7 +123,9 @@ int main(int argn, char **argv) {
                         }
                 } endfor
 
-                assert(is_weight == MWIS_weight);
+                if(is_weight != MWIS_weight) {
+                    std::cerr << "ERROR: failed MIS weight check! " << MWIS_weight << " != " << is_weight << std::endl;
+                };
                 // std::cout << "MIS_weight_check " << is_weight << std::endl;
         }
 

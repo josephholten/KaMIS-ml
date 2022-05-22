@@ -110,7 +110,7 @@ int main(int argn, char **argv) {
         } endfor
 
         if (algo_log::logger()["solution"] != is_weight) {
-            std::perror("ERROR: failed MIS weight check!");
+            std::cerr << "ERROR: failed MIS weight check!" << std::endl;
             return 1;
         }
     }
