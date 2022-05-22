@@ -76,6 +76,7 @@ int main(int argn, char **argv) {
             return ret_code;
 
         mis_config.graph_filename = graph_filepath.substr(graph_filepath.find_last_of('/') + 1);
+        algo_log::logger().instance(mis_config.graph_filename);
 
         // Read the graph
         graph_access G;

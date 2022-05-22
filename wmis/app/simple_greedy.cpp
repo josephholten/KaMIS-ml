@@ -55,8 +55,6 @@ int main(int argc, char** argv) {
     if (int ret_code = parse_parameters(argc, argv, mis_config, graph_filepath); ret_code)
         return ret_code;
 
-    algo_log::logger().instance(graph_filepath);
-
     graph_access G;
     graph_io::readGraphWeighted(G, graph_filepath);
     algo_log::logger().instance(graph_filepath.substr(graph_filepath.find_last_of('/') + 1));
