@@ -85,7 +85,10 @@ int main(int argn, char **argv) {
         // test correctness of output path
         if (mis_config.write_graph) {
             std::ifstream file(mis_config.output_filename);
-            assert(file.is_open());
+            if(!file.is_open()){
+                std::perror("ERROR: invalid output path");
+                std::exit(1);
+            }
         }
 
         // Read the graph

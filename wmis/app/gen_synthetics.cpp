@@ -128,11 +128,10 @@ int main(int argc, char** argv) {
     parse_parameters(argc, argv, config, path);
 
     {
-        std::ifstream ifile(path + "/test");
-        if (!ifile.is_open()) {
-            std::ofstream file(path + "/test");
-            assert(file.is_open() && "invalid path");
-            std::remove((path + "/test").c_str());
+        std::ifstream file(path + "/test");
+        if (!file.is_open()) {
+            std::perror("ERROR: invalid path");
+            std::exit(1);
         }
     }
 
