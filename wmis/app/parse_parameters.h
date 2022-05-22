@@ -123,9 +123,7 @@ int parse_parameters(int argn, char **argv,
 
     if (output->count > 0) {
         mis_config.output_filename = output->sval[0];
-
-        std::ofstream graph_file(mis_config.output_filename);
-        assert(graph_file.is_open() && "provide a valid output path!");
+        validate_path(mis_config.output_filename);
 
         mis_config.write_graph = true;
     } else {
@@ -134,6 +132,7 @@ int parse_parameters(int argn, char **argv,
 
     if (log_file->count > 0) {
         mis_config.log_file = log_file->sval[0];
+        validate_path(mis_config.log_file);
     }
 
     arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));

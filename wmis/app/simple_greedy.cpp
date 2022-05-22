@@ -60,11 +60,6 @@ int main(int argc, char** argv) {
     graph_access G;
     graph_io::readGraphWeighted(G, graph_filepath);
 
-    if (argc == 3)
-        validate_path(argv[2]);
-    if (argc == 4)
-        validate_path(argv[4]);
-
     greedy_algorithm<ht_heuristic> alg(G);
 
     algo_log::logger().start_timer();

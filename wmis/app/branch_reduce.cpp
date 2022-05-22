@@ -76,8 +76,6 @@ int main(int argn, char **argv) {
             return ret_code;
 
         mis_config.graph_filename = graph_filepath.substr(graph_filepath.find_last_of('/') + 1);
-        if (mis_config.write_graph)
-            validate_path(mis_config.output_filename);
 
         // Read the graph
         graph_access G;
