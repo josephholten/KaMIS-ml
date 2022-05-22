@@ -128,9 +128,12 @@ int main(int argc, char** argv) {
     parse_parameters(argc, argv, config, path);
 
     {
-        std::ofstream file(path + "test");
-        assert(file.is_open() && "invalid path");
-        std::remove((path + "test").c_str());
+        std::ifstream ifile(path + "/test");
+        if (!ifile.is_open()) {
+            std::ofstream file(path + "/test");
+            assert(file.is_open() && "invalid path");
+            std::remove((path + "/test").c_str());
+        }
     }
 
     graph_access G;
