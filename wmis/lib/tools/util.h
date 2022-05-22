@@ -6,6 +6,7 @@
 #define MWIS_ML_SAFE_C_API_H
 
 #include "xgboost/c_api.h"
+#include <fstream>
 
 #define safe_xgboost(call) {                                            \
 int err = (call);                                                       \
@@ -15,12 +16,6 @@ if (err != 0) {                                                         \
     }                                                                    \
 }
 
-bool validate_path(std::string path, bool weak=false) {
-    //      file exists already               file does not yet exist
-    if (!std::ifstream(path).is_open() && !std::ofstream(path).is_open()) {
-        std::perror("ERROR: invalid path");
-        std::exit(1);
-    }
-}
+bool validate_path(const std::string& path, bool weak=false);
 
 #endif //MWIS_ML_SAFE_C_API_H

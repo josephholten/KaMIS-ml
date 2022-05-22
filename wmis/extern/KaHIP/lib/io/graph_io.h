@@ -18,6 +18,7 @@
 
 #include "definitions.h"
 #include "data_structure/graph_access.h"
+#include "algo_log.h"
 
 class graph_io {
         public:
@@ -70,8 +71,7 @@ void graph_io::writeVector(std::vector<vectortype> & vec, const std::string & fi
         for( unsigned i = 0; i < vec.size(); ++i) {
                 f << vec[i] <<  std::endl;
         }
-
-        f.close();
+        algo_log::logger()["solution_file"] = filename;
 }
 
 template<typename vectortype>

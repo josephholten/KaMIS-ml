@@ -173,7 +173,8 @@ set(SOURCES
         lib/data_structure/priority_queues/bucket_array.cpp
         lib/mis/kernel/branch_and_reduce_algorithm.cpp
         lib/mis/kernel/reductions.cpp
-        ../extern/argtable3-3.0.3/argtable3.c)
+        ../extern/argtable3-3.0.3/argtable3.c
+        lib/tools/util.cpp)
 
 add_library(libsources OBJECT ${SOURCES})
 

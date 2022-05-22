@@ -75,10 +75,7 @@ int main(int argc, char** argv) {
 
     algo_log::logger().solution(weight);
 
-    if (argc == 3) {
-        graph_io::writeVector(IS, argv[2]);
-        algo_log::logger()["solution_file"] = argv[2];
-    }
+    if (argc == 3) graph_io::writeVector(IS, argv[2]);
 
     std::cout << std::setw(2) << algo_log::logger() << std::endl;
 }

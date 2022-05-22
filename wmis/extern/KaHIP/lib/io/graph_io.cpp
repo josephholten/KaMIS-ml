@@ -7,6 +7,7 @@
 
 #include <sstream>
 #include "graph_io.h"
+#include "algo_log.h"
 
 graph_io::graph_io() {
 
@@ -372,5 +373,5 @@ void graph_io::writeIndependentSet(graph_access & G, std::string filename) {
                 f << G.getPartitionIndex(node) <<  std::endl;
         } endfor
 
-        f.close();
+        algo_log::logger()["solution_file"] = filename;
 }
