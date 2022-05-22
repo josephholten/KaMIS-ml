@@ -59,6 +59,7 @@ int main(int argc, char** argv) {
 
     graph_access G;
     graph_io::readGraphWeighted(G, graph_filepath);
+    algo_log::logger().instance(graph_filepath.substr(graph_filepath.find_last_of('/') + 1));
 
     greedy_algorithm<ht_heuristic> alg(G);
 
