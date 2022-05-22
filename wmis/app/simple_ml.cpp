@@ -88,7 +88,6 @@ int main(int argn, char **argv) {
     graph_io::readGraphWeighted(G, graph_filepath, comments);
     assign_weights(G, mis_config);
 
-
     algo_log::logger().start_timer();
     branch_and_reduce_algorithm reducer(G, mis_config);
     reducer.run_branch_reduce();
@@ -110,7 +109,7 @@ int main(int argn, char **argv) {
         } endfor
 
         if (algo_log::logger()["solution"] != is_weight) {
-            std::cerr << "ERROR: failed MIS weight check!" << std::endl;
+            std::cerr << "ERROR: failed MIS weight check! " << algo_log::logger()["solution"] << " != " << is_weight << std::endl;
             return 1;
         }
     }

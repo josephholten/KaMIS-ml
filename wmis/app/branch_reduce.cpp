@@ -66,8 +66,6 @@ void assign_weights(graph_access& G, const MISConfig& mis_config) {
 }
 
 int main(int argn, char **argv) {
-        mis_log::instance()->restart_total_timer();
-
         algo_log::logger().set_name("branch_reduce");
         
         MISConfig mis_config;
@@ -80,8 +78,8 @@ int main(int argn, char **argv) {
         }
 
         mis_config.graph_filename = graph_filepath.substr(graph_filepath.find_last_of('/') + 1);
-        mis_log::instance()->set_config(mis_config);
-        validate_path(mis_config.output_filename);
+        if (mis_config.write_graph)
+            validate_path(mis_config.output_filename);
 
         // Read the graph
         graph_access G;
@@ -89,24 +87,14 @@ int main(int argn, char **argv) {
         graph_io::readGraphWeighted(G, graph_filepath, comments);
         assign_weights(G, mis_config);
 
-        mis_log::instance()->set_graph(G);
-
-        //std::cout << "%nodes " << G.number_of_nodes() << std::endl;
-        //std::cout << "%edges " << G.number_of_edges() << std::endl;
-
         algo_log::logger().start_timer();
-        auto start = std::chrono::system_clock::now();
 
         branch_and_reduce_algorithm reducer(G, mis_config);
         reducer.run_branch_reduce();
-        NodeWeight MWIS_weight = reducer.get_current_is_weight();
 
-        auto end = std::chrono::system_clock::now();
         algo_log::logger().end_timer();
 
-        std::chrono::duration<float> branch_reduce_time = end - start;
-        // std::cout << "time " << branch_reduce_time.count() << "\n";
-        // std::cout << "MIS_weight " << MWIS_weight << "\n";
+        NodeWeight MWIS_weight = reducer.get_current_is_weight();
         algo_log::logger().solution(MWIS_weight);
 
         reducer.apply_branch_reduce_solution(G);

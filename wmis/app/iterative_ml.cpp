@@ -100,9 +100,6 @@ int main(int argn, char **argv) {
 
     mis_log::instance()->set_graph(G);
 
-    //std::cout << "%nodes " << G.number_of_nodes() << std::endl;
-    //std::cout << "%edges " << G.number_of_edges() << std::endl;
-
     auto start = std::chrono::system_clock::now();
 
     branch_and_reduce_algorithm reducer(G, mis_config);

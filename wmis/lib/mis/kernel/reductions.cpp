@@ -1104,7 +1104,7 @@ void ml_reduction::load_model(const std::string &model) {
 bool ml_reduction::reduce(branch_and_reduce_algorithm* br_alg) {
     auto &status = br_alg->status;
     auto &config = br_alg->config;
-    if (status.remaining_nodes <= 1)
+    if (status.remaining_nodes <= 0)
         return false;
 
     // init model on first reduction run

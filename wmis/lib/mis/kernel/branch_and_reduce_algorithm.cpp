@@ -223,7 +223,7 @@ void branch_and_reduce_algorithm::compute_ils_pruning_bound() {
 	best_weight = status.reduction_offset + status.is_weight + run_ils(config_cpy, *local_graph, buffers[0], 1000);
 
 	cout_handler::enable_cout();
-	std::cout << (get_current_is_weight() + best_weight) << " [" << t.elapsed() << "]" << std::endl;
+	// std::cout << (get_current_is_weight() + best_weight) << " [" << t.elapsed() << "]" << std::endl;
 }
 
 NodeWeight branch_and_reduce_algorithm::compute_cover_pruning_bound() {
@@ -687,7 +687,7 @@ void branch_and_reduce_algorithm::update_best_solution() {
 		best_weight = current_weight;
 		is_ils_best_solution = false;
 
-		std::cout << (get_current_is_weight() + current_weight) << " [" << t.elapsed() << "]" << std::endl;
+		// std::cout << (get_current_is_weight() + current_weight) << " [" << t.elapsed() << "]" << std::endl;
 	}
 }
 
