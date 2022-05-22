@@ -11,6 +11,7 @@
 #include "argtable3.h"
 
 #include "configuration_mis.h"
+#include "util.h"
 
 /**
  * Parse the given parameters and apply them to the config.
