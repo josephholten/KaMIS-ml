@@ -49,8 +49,8 @@ int main(int argc, char** argv) {
     // test_min_priority_queue();
     algo_log::logger().set_name("simple_greedy");
 
-    if (argc < 2 || argc > 3) {
-        std::cerr << "ERROR: Arguments: graph_filename [output_filename]" << std::endl;
+    if (argc < 2 || argc > 4) {
+        std::cerr << "ERROR: Arguments: graph_filename [output_filename] [log_filename]" << std::endl;
         return 1;
     }
 
@@ -61,6 +61,8 @@ int main(int argc, char** argv) {
 
     if (argc == 3)
         validate_path(argv[2]);
+    if (argc == 4)
+        validate_path(argv[4]);
 
     greedy_algorithm<ht_heuristic> alg(G);
 
@@ -77,5 +79,6 @@ int main(int argc, char** argv) {
 
     if (argc == 3) graph_io::writeVector(IS, argv[2]);
 
+    algo_log::logger().write(argv[3]);
     std::cout << std::setw(2) << algo_log::logger() << std::endl;
 }

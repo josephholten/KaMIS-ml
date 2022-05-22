@@ -67,7 +67,6 @@ void assign_weights(graph_access& G, const MISConfig& mis_config) {
 
 int main(int argn, char **argv) {
         mis_log::instance()->restart_total_timer();
-        //mis_log::instance()->print_title();
 
         algo_log::logger().set_name("branch_reduce");
         
@@ -130,6 +129,7 @@ int main(int argn, char **argv) {
 
         if (mis_config.write_graph) graph_io::writeIndependentSet(G, mis_config.output_filename);
 
+        algo_log::logger().write(mis_config.log_file);
         std::cout << std::setw(2) << algo_log::logger() << std::endl;
         return 0;
 }

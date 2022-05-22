@@ -2,17 +2,19 @@ cmake_minimum_required(VERSION 2.8.9)
 project(components)
 
 if (NOT CMAKE_BUILD_TYPE)
+    message("No BUILD_TYPE, setting to Release")
     set(CMAKE_BUILD_TYPE Release) 
 endif (NOT CMAKE_BUILD_TYPE)
 
 set(CMAKE_CXX_STANDARD 17)
 
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
-    message(Debug build)
+    message("Debug build")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -fPIC -O0 -fsanitize=address -fsanitize=leak")
 endif(CMAKE_BUILD_TYPE STREQUAL Debug)
 
 if (CMAKE_BUILD_TYPE STREQUAL Release)
+    message("Release build")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -march=native -DNDEBUG -fPIC -O3")
 endif(CMAKE_BUILD_TYPE STREQUAL Release)
 

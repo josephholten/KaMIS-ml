@@ -44,6 +44,7 @@ int parse_parameters_ml(int argn, char **argv,
     struct arg_lit *ls_updates          = arg_lit0(NULL, "ls_updates", "Print updates in local search signal in ML reductions");
     struct arg_dbl *ml_pruning          = arg_dbl0(NULL, "ml_pruning", NULL, "How aggresively to prune vertices based on the ML prediction");
     struct arg_str *model               = arg_str0(NULL, "model", NULL, "Where to load/ save the model");
+    struct arg_str *log_file            = arg_str0(NULL, "log_file", NULL, "Path to the log file.");
 
     struct arg_end *end                 = arg_end(100);
 
@@ -65,6 +66,7 @@ int parse_parameters_ml(int argn, char **argv,
             ls_updates,
             ml_pruning,
             model,
+            log_file,
             end
     };
 
@@ -169,6 +171,10 @@ int parse_parameters_ml(int argn, char **argv,
             std::cerr << "iterative-ml: ERROR: Please provide a valid ml model path." << std::endl;
             exit(1);
         }
+    }
+
+    if (log_file->count > 0) {
+        mis_config.log_file = log_file->sval[0];
     }
 
     arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));

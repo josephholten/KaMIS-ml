@@ -64,7 +64,7 @@ void assign_weights(graph_access& G, const MISConfig& mis_config) {
 }
 
 int main(int argn, char **argv) {
-    mis_log::instance()->restart_total_timer();
+    algo_log::logger().set_name("simple_ml");
 
     MISConfig mis_config;
     std::string graph_filepath;
@@ -81,7 +81,6 @@ int main(int argn, char **argv) {
     mis_config.reduction_style = MISConfig::SIMPLE_ML;
 
     mis_config.graph_filename = graph_filepath.substr(graph_filepath.find_last_of('/') + 1);
-    mis_log::instance()->set_config(mis_config);
 
     // Read the graph
     graph_access G;
@@ -89,22 +88,13 @@ int main(int argn, char **argv) {
     graph_io::readGraphWeighted(G, graph_filepath, comments);
     assign_weights(G, mis_config);
 
-    mis_log::instance()->set_graph(G);
 
-    //std::cout << "%nodes " << G.number_of_nodes() << std::endl;
-    //std::cout << "%edges " << G.number_of_edges() << std::endl;
-
-    auto start = std::chrono::system_clock::now();
-
+    algo_log::logger().start_timer();
     branch_and_reduce_algorithm reducer(G, mis_config);
     reducer.run_branch_reduce();
-    NodeWeight MWIS_weight = reducer.get_current_is_weight();
+    algo_log::logger().end_timer();
 
-    auto end = std::chrono::system_clock::now();
-
-    std::chrono::duration<float> branch_reduce_time = end - start;
-    std::cout << "time " << branch_reduce_time.count() << "\n";
-    std::cout << "MIS_weight " << MWIS_weight << "\n";
+    algo_log::logger().solution(reducer.get_current_is_weight());
 
     reducer.apply_branch_reduce_solution(G);
 
@@ -119,12 +109,16 @@ int main(int argn, char **argv) {
                 is_weight += G.getNodeWeight(node);
         } endfor
 
-        // std::cout << "MIS_weight_check " << is_weight << std::endl;
+        if (algo_log::logger()["solution"] != is_weight) {
+            std::perror("ERROR: failed MIS weight check!");
+            return 1;
+        }
     }
 
     if (mis_config.write_graph) graph_io::writeIndependentSet(G, mis_config.output_filename);
 
-    std::cout << std::endl;
+    algo_log::logger().write(mis_config.log_file);
+    std::cout << std::setw(2) << algo_log::logger() << std::endl;
 
     return 0;
 }
