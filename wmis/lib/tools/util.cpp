@@ -17,7 +17,8 @@ bool validate_path(const std::string& path, bool weak=false) {
                 std::exit(1);
             else
                 return false;
-        }
+        } else
+            std::remove(path.c_str());
     }
     return true;
 }
