@@ -128,10 +128,7 @@ int main(int argn, char **argv) {
                 // std::cout << "MIS_weight_check " << is_weight << std::endl;
         }
 
-        if (mis_config.write_graph) {
-            graph_io::writeIndependentSet(G, mis_config.output_filename);
-            algo_log::logger()["solution_file"] = mis_config.output_filename;
-        }
+        if (mis_config.write_graph) graph_io::writeIndependentSet(G, mis_config.output_filename);
 
         std::cout << std::setw(2) << algo_log::logger() << std::endl;
         return 0;
