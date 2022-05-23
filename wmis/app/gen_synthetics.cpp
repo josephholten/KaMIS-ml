@@ -61,12 +61,10 @@ public:
                 add_edge(center, add_node());
             }
         } else if (family == graph_family::tree) {
-            auto root = add_node();
-            NodeID remaining_nodes = n-1;
+            auto parent = add_node();  // root
 
+            NodeID remaining_nodes = n-1;
             while (remaining_nodes > 0) {
-                // take last child added as next parent
-                auto parent = current_node();
                 std::uniform_int_distribution<EdgeID> random_degree(1, remaining_nodes);
                 auto degree = random_degree(generator);
 
@@ -75,6 +73,7 @@ public:
                 }
 
                 remaining_nodes -= degree;
+                parent++;
             }
         }
         assert(nodes == (start_nodes + n));
