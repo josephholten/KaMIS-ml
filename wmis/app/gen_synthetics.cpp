@@ -12,134 +12,119 @@
 #include "random_functions.h"
 #include "util.h"
 
-void assign_weights(graph_access& G, const synth_config& config, std::default_random_engine& generator) {
-    NodeWeight MAX_WEIGHT = std::min(200u, config.max_weight);
+class graph_builder {
+public:
+    graph_builder(const synth_config& _config) : config {_config} {
+        generator.seed(config.seed);
+        weight_distribution = std::uniform_int_distribution<NodeWeight>(1, config.max_weight);
 
-    if (config.source == synth_config::weight_source::HYBRID) {
-        forall_nodes(G, node) {
-            G.setNodeWeight(node, (node + 1) % MAX_WEIGHT + 1);
-        } endfor
-    } else if (config.source == synth_config::weight_source::UNIFORM) {
-        std::uniform_int_distribution<NodeWeight> distribution(1,MAX_WEIGHT);
-
-        forall_nodes(G, node) {
-            G.setNodeWeight(node, distribution(generator));
-        } endfor
-    } else if (config.source == synth_config::weight_source::GEOMETRIC) {
-        MAX_WEIGHT = std::max(2u,MAX_WEIGHT);
-        std::binomial_distribution<NodeWeight> distribution(MAX_WEIGHT / 2);
-
-        forall_nodes(G, node) {
-            G.setNodeWeight(node, distribution(generator));
-        } endfor
-    }
-}
-
-void gen_graph(graph_access& G, graph_family family, const synth_config& config, std::default_random_engine& generator) {
-    size_t n = random_functions::nextInt(config.max_size, config.max_size);
-    size_t m;
-
-    if (family == graph_family::path || family == graph_family::tree || family == graph_family::star ) {
-        m = n - 1;
-    } else if (family == graph_family::cycle) {
-        m = n;
+        adj.resize(config.size);
+        weights.resize(config.size);
     }
 
-    // forward & back edges
-    m *= 2;
-
-    std::vector<NodeID> start(n+1, 0);
-    std::vector<EdgeID> edges(m, 0);
-
-    if (family == graph_family::path) {
-        start[1] = 1;
-        for (size_t i = 2; i < n; ++i)
-            start[i] = start[i - 1] + 2;
-        start[n] = m;
-
-        edges[0] = 1;
-        for (size_t i = 1; i < n - 1; ++i) {
-            edges[2*i-1] = i - 1;
-            edges[2*i  ] = i + 1;
+    void build_mixed(graph_access& G) {
+        std::uniform_int_distribution<size_t> random_family_idx(0, config.types.size()-1);
+        while (nodes < config.size) {
+            add(random_size(), config.types[random_family_idx(generator)]);
         }
-        edges[m-1] = n-2;
-    } else if (family == graph_family::cycle ) {
-        for (size_t i = 1; i < n; ++i)
-            start[i] = start[i - 1] + 2;
-        start[n] = m;
-
-        for (size_t i = 0; i < n; ++i) {
-            edges[2*i    ] = (i - 1) % n;
-            edges[2*i + 1] = (i + 1) % n;
-        }
-    } else if (family == graph_family::star) {
-        // node 0 is center node, so node 1 starts at deg(0)
-        start[1] = n-1;
-        for (size_t i = 2; i < n; ++i)
-            start[i] = start[i-1] + 1;
-        start[n] = m;
-
-        // edges from center
-        for (size_t i = 0; i < n; ++i)
-            edges[i] = i + 1;
-        // edges to center
-        for (size_t i = n; i < m; ++i)
-            edges[i] = 0;
-    } else if (family == graph_family::tree) {
-        auto remaining = m;
-        size_t node = 0;
-
-        std::vector<std::vector<NodeID>> adj(1);
-
-        while (remaining > 0) {
-            std::uniform_int_distribution<NodeWeight> distribution(1,remaining);
-            auto degree = distribution(generator);
-            remaining -= 2*degree;
-
-            // adj contains vectors for each created node, neighbor is next
-            auto neighbor = adj.size();
-
-            // degree new nodes
-            adj.resize(adj.size() + degree);
-
-            for (size_t d = 0; d < degree; ++d) {
-                adj[node].push_back(neighbor + d);
-                adj[neighbor + d].push_back(node);
-            }
-
-            ++node;
-        }
-
-        start.clear();
-        edges.clear();
+        std::vector<EdgeID> start;
+        std::vector<NodeID> edge_arr;
         for (auto neighborhood : adj) {
-            start.push_back(edges.size());
-            std::copy(neighborhood.begin(), neighborhood.end(), std::back_inserter(edges));
+            start.push_back(edge_arr.size());
+            std::copy(neighborhood.begin(), neighborhood.end(), std::back_inserter(edge_arr));
         }
-        start.push_back(edges.size());
+        start.push_back(edge_arr.size());
+        G.build_from_metis(start, edge_arr, weights);
+    };
+
+    void add(NodeID n, graph_family family) {
+        auto start_nodes = nodes;
+        if (n + nodes > adj.size()) {
+            adj.resize(n + nodes);
+            weights.resize(n + nodes);
+        }
+
+        if (family == graph_family::path) {
+            for (size_t i = 0; i < n - 1; ++i) {
+                auto node = add_node();
+                add_edge(node, node + 1);
+            }
+            add_node();
+        } else if (family == graph_family::cycle) {
+            auto first_node_of_cycle = current_node() + 1;
+            add(n, graph_family::path);
+            if (n != 1)
+                add_edge(current_node(), first_node_of_cycle);
+        } else if (family == graph_family::star) {
+            auto center = add_node();
+            for (size_t i = 1; i < n; ++i) {
+                add_edge(center, add_node());
+            }
+        } else if (family == graph_family::tree) {
+            auto root = add_node();
+            NodeID remaining_nodes = n-1;
+
+            while (remaining_nodes > 0) {
+                // take last child added as next parent
+                auto parent = current_node();
+                std::uniform_int_distribution<EdgeID> random_degree(1, remaining_nodes);
+                auto degree = random_degree(generator);
+
+                for (NodeID i = 0; i < degree; ++i) {
+                    add_edge(parent, add_node());
+                }
+
+                remaining_nodes -= degree;
+            }
+        }
+        assert(nodes == (start_nodes + n));
+    };
+
+private:
+    const synth_config& config;
+    std::mt19937 generator;
+    std::uniform_int_distribution<NodeWeight> weight_distribution;
+
+    NodeID nodes = 0;
+    NodeID edges = 0;
+    std::vector<std::vector<NodeID>> adj;
+    std::vector<NodeWeight> weights;
+
+    NodeID current_node() {
+        return nodes - 1;
     }
 
-    G.build_from_metis(start, edges);
-    assign_weights(G, config, generator);
-}
+    NodeID add_node() {
+        assert(nodes < adj.size());
+        weights[nodes] = random_weight();
+        return nodes++;
+    }
+
+    void add_edge(NodeID source, NodeID target) {
+        assert(source <= adj.size() && target <= adj.size());
+        adj[source].push_back(target);
+        adj[target].push_back(source);
+        edges++;
+    }
+
+    NodeWeight random_weight() {
+        return weight_distribution(generator);
+    };
+
+    NodeID random_size() {
+        std::uniform_int_distribution<NodeID> size_distribution(1, std::max(1ul,((config.size - nodes) / config.types.size())));
+        return size_distribution(generator);
+    };
+};
 
 int main(int argc, char** argv) {
     synth_config config;
     std::string path;
     parse_parameters(argc, argv, config, path);
-    validate_path(path + "/test");
+    validate_path(path);
 
     graph_access G;
-    std::default_random_engine generator(config.seed);
-
-    for (auto type : config.types) {
-        for (int i = 0; i < config.instances; ++i) {
-            gen_graph(G, type, config, generator);
-            std::stringstream ss;
-            ss << path << "/" << family_to_str.at(type) << i << ".graph";
-            std::ofstream file(ss.str());
-            config.serialize(file);
-            graph_io::writeGraphNodeWeighted(G, file);
-        }
-    }
+    graph_builder builder(config);
+    builder.build_mixed(G);
+    graph_io::writeGraphNodeWeighted(G, path);
 }

@@ -5,57 +5,62 @@
 #include "graph_access.h"
 
 int main(int argc, char** argv) {
-    assert(argc <= 4 && "Args: graph_filename [is1] [is2]");
+    assert(argc >= 2 && argc <= 4 && "Args: graph_filename [is1] [is2]");
     graph_access G;
     graph_io::readGraphWeighted(G, argv[1]);
 
-    std::cout << "strict graph {" << std::endl;
+    // reading IS's and getting max weight
+    std::vector<int> is_1(G.number_of_nodes()), is_2(G.number_of_nodes());
 
-    if (argc == 3) {
-        std::vector<int> is(G.number_of_nodes());
-        graph_io::readVector(is, argv[2]);
-
-        std::cout << "  {" << std::endl;
-        std::cout << "    node [style=filled]" << std::endl;
-        forall_nodes(G, node) {
-            std::cout << "    " << node << " [fillcolor=" << (is[node] ? "lightblue]" : "white]") << std::endl;
-        } endfor
-        std::cout << "  }" << std::endl;
-    } else if (argc == 4) {
-        std::vector<int> is_1(G.number_of_nodes());
+    if (argc >= 3)
         graph_io::readVector(is_1, argv[2]);
-
-        std::vector<int> is_2(G.number_of_nodes());
+    if (argc == 4)
         graph_io::readVector(is_2, argv[3]);
 
-        std::cout << "  {" << std::endl;
-        std::cout << "    node [style=filled]" << std::endl;
+    double avg_weight = 0;
+    forall_nodes(G, node) {
+                avg_weight = G.getNodeWeight(node);
+    } endfor
+    avg_weight /= G.number_of_nodes();
 
-        NodeWeight max_weight = 0;
-        forall_nodes(G, node) {
-            max_weight = std::max(max_weight, G.getNodeWeight(node));
-        } endfor
 
-        forall_nodes(G, node) {
-            if (is_1[node] == 1 && is_2[node] == 1) {
-                std::cout << "    " << node << " [fillcolor=lightblue";
+    std::cout << "strict graph {" << std::endl;
+
+    // nodes
+    std::cout << "  {" << std::endl;
+    std::cout << "    node [style=filled]" << std::endl;
+    forall_nodes(G, node) {
+        std::cout << "    " << node << " [";
+        if (argc >= 3) {
+            std::string color;
+            if (argc == 3) {
+                 color = is_1[node] ? "lightblue" : "white";
+            } else if (argc == 4) {
+                if (is_1[node] == 1 && is_2[node] == 1) {
+                    color = "lightblue";
+                }
+                if (is_1[node] == 1 && is_2[node] == 0) {
+                    color = "lightgreen";
+                }
+                if (is_1[node] == 0 && is_2[node] == 1) {
+                    color = "red";
+                }
+                if (is_1[node] == 0 && is_2[node] == 0) {
+                    color = "white";
+                }
             }
-            if (is_1[node] == 1 && is_2[node] == 0) {
-                std::cout << "    " << node << " [fillcolor=lightgreen";
-            }
-            if (is_1[node] == 0 && is_2[node] == 1) {
-                std::cout << "    " << node << " [fillcolor=red";
-            }
-            if (is_1[node] == 0 && is_2[node] == 0) {
-                std::cout << "    " << node << " [fillcolor=white";
-            }
-            std::cout << ",fixedsize=true";
-            std::cout << ",height=" << (double) G.getNodeWeight(node) / max_weight;
-            std::cout << ",width="  << (double) G.getNodeWeight(node) / max_weight;
-            std::cout << "]" << std::endl;
-        } endfor
-        std::cout << "  }" << std::endl;
-    }
+            std::cout << "fillcolor=" << color << ",";
+        }
+
+        std::cout << "label=" << G.getNodeWeight(node) << ",";
+        std::cout << "fixedsize=true,";
+        double size = exp(0.2 * (G.getNodeWeight(node) - avg_weight));
+        std::cout << "height=" << size << ",width=" << size << ",";
+
+        std::cout << "]" << std::endl;
+    } endfor
+
+    std::cout << "  }" << std::endl;
 
     forall_nodes(G, node) {
         std::cout << "  " << node << " -- {";

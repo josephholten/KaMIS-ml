@@ -210,7 +210,7 @@ class graph_access {
 
                 int build_from_metis(int n, int* xadj, int* adjncy);
                 int build_from_metis_weighted(int n, int* xadj, int* adjncy, int * vwgt, int* adjwgt);
-                int build_from_metis(const std::vector<NodeID>& start, const std::vector<EdgeID>& edges);
+                int build_from_metis(const std::vector<EdgeID>& start, const std::vector<NodeID>& edges, const std::vector<NodeWeight>& weights);
 
     //void set_node_queue_index(NodeID node, Count queue_index);
                 //Count get_node_queue_index(NodeID node);
@@ -486,7 +486,7 @@ inline int graph_access::build_from_metis_weighted(int n, int* xadj, int* adjncy
         return 0;
 }
 
-inline int graph_access::build_from_metis(const std::vector<NodeID>& start, const std::vector<EdgeID>& edges) {
+inline int graph_access::build_from_metis(const std::vector<EdgeID>& start, const std::vector<NodeID>& edges, const std::vector<NodeWeight>& weights) {
     graphref = new basicGraph();
 
     auto n = start.size() - 1;
@@ -494,7 +494,7 @@ inline int graph_access::build_from_metis(const std::vector<NodeID>& start, cons
 
     for( unsigned i = 0; i < (unsigned)n; i++) {
         NodeID node = new_node();
-        setNodeWeight(node, 1);
+        setNodeWeight(node, weights[node]);
         setPartitionIndex(node, 0);
 
         for( unsigned e = start[i]; e < start[i+1]; e++) {
