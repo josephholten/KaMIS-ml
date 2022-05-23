@@ -27,6 +27,9 @@ public:
         while (nodes < config.size) {
             add(random_size(), config.types[random_family_idx(generator)]);
         }
+        for (auto& neighborhood : adj)
+            std::sort(neighborhood.begin(), neighborhood.end());
+
         std::vector<EdgeID> start;
         std::vector<NodeID> edge_arr;
         for (auto neighborhood : adj) {
@@ -53,7 +56,7 @@ public:
         } else if (family == graph_family::cycle) {
             auto first_node_of_cycle = current_node() + 1;
             add(n, graph_family::path);
-            if (n != 1)
+            if (n > 2)
                 add_edge(current_node(), first_node_of_cycle);
         } else if (family == graph_family::star) {
             auto center = add_node();
