@@ -8,7 +8,7 @@
 #include "ml_features.h"
 #include "extern/algo_test/algo_log.h"
 #include "util.h"
-#include "parse_parameters.h"
+#include "parse_parameters_ml.h"
 
 class ht_heuristic {
 public:
@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
 
     MISConfig mis_config;
     std::string graph_filepath;
-    if (int ret_code = parse_parameters(argc, argv, mis_config, graph_filepath); ret_code)
+    if (int ret_code = parse_parameters_ml(argc, argv, mis_config, graph_filepath); ret_code)
         return ret_code;
 
     graph_access G;
