@@ -84,7 +84,7 @@ int main(int argn, char** argv) {
     safe_xgboost(XGBoosterSetParam(booster, "scale_pos_weight", ss.str().c_str()));
 
     std::cout << "LOG: ml-train: starting training\n";
-    int n_trees = 30;
+    int n_trees = 40;
     const char *eval_names[2] = {"train", "test"};
     const char *eval_result = nullptr;
 
