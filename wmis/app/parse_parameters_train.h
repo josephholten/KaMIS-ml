@@ -39,6 +39,8 @@ int parse_parameters_train(int argn, char **argv,
     struct arg_dbl *ls_time             = arg_dbl0(NULL, "ls_time", NULL, "Time limit for local search signals in ML reductions");
     struct arg_lit *ls_updates          = arg_lit0(NULL, "ls_updates", "Print updates in local search signal in ML reductions");
     struct arg_str *model               = arg_str0(NULL, "model", NULL, "Where to save the model");
+    struct arg_int *iterations          = arg_int0(NULL, "iterations", NULL, "How many boost iterations to perform.");
+    struct arg_int *max_depth           = arg_int0(NULL, "max_depth", NULL, "Maximum depth of the decision trees.");
 
     struct arg_end *end                 = arg_end(100);
 
