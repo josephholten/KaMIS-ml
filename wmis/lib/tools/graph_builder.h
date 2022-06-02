@@ -38,7 +38,7 @@ public:
             std::stringstream ss(line);
             NodeID source, target;
             ss >> type >> source >> target;
-            add_edge(source-1, target-1);
+            adj[source-1].push_back(target-1);
         }
 
         for (NodeID node = 0; node < n; ++node)
