@@ -10,7 +10,7 @@
 #include "graph_io.h"
 #include "parse_parameters_synthetics.h"
 #include "random_functions.h"
-#include "util.h"
+#include "synthetic_config.h"
 #include "synthetic_graph_builder.h"
 
 

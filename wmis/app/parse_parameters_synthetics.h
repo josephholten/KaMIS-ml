@@ -14,6 +14,10 @@
 #include "synthetic_config.h"
 #include "util.h"
 
+static bool str_cmp(const std::string & str1, const std::string & str2) {
+    return str1.size() == str2.size() && std::equal(str1.begin(), str1.end(), str2.begin(), [](unsigned char c1, unsigned char c2){ return std::toupper(c1) == std::toupper(c2); });
+}
+
 /**
  * Parse the given parameters and apply them to the config.
  *
