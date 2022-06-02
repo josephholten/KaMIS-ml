@@ -34,7 +34,7 @@ public:
             std::stringstream ss(line);
             NodeID source, target;
             ss >> type >> source >> target;
-            add_edge(source, target);
+            add_edge(source-1, target-1);
         }
 
         for (NodeID node = 0; node < n; ++node)
@@ -61,7 +61,7 @@ protected:
     }
 
     void add_edge(NodeID source, NodeID target) {
-        assert(source <= adj.size() && target <= adj.size());
+        assert(source < adj.size() && target < adj.size());
         adj[source].push_back(target);
         adj[target].push_back(source);
         edges++;
