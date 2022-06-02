@@ -176,7 +176,6 @@ set(SOURCES
         lib/mis/kernel/branch_and_reduce_algorithm.cpp
         lib/mis/kernel/reductions.cpp
         ../extern/argtable3-3.0.3/argtable3.c
-        lib/tools/util.cpp
         )
 
 add_library(libsources OBJECT ${SOURCES})
@@ -186,6 +185,7 @@ set(ML_SOURCES
         lib/mis/ml/weighted_ls.cpp
         lib/tools/graph_builder.cpp
         lib/tools/synthetic_graph_builder.cpp
+        lib/tools/util.cpp
         )
 
 add_subdirectory(extern/xgboost)
