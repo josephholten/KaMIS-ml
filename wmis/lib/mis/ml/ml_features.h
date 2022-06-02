@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <mis_config.h>
+#include <array>
 
 #include "graph_access.h"
 #include "util.h"

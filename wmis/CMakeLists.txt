@@ -176,19 +176,22 @@ set(SOURCES
         lib/mis/kernel/branch_and_reduce_algorithm.cpp
         lib/mis/kernel/reductions.cpp
         ../extern/argtable3-3.0.3/argtable3.c
-        lib/tools/util.cpp)
+        lib/tools/util.cpp
+        )
 
 add_library(libsources OBJECT ${SOURCES})
 
 set(ML_SOURCES
         lib/mis/ml/ml_features.cpp
         lib/mis/ml/weighted_ls.cpp
-)
+        lib/tools/graph_builder.cpp
+        lib/tools/synthetic_graph_builder.cpp
+        )
 
 add_subdirectory(extern/xgboost)
 add_subdirectory(extern/json)
 
-add_library(libml OBJECT ${ML_SOURCES})
+add_library(libml OBJECT ${ML_SOURCES} lib/tools/graph_builder.h)
 target_link_libraries(libml nlohmann_json::nlohmann_json)
 
 
@@ -210,7 +213,7 @@ target_link_libraries(iterative_ml xgboost)
 add_executable(greedy_reduction "app/greedy_reduction.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
 target_link_libraries(greedy_reduction xgboost)
 
-add_executable(analyze "app/analyze.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
+add_executable(analyze "app/analyze.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml> app/synthetic_config.h)
 target_link_libraries(analyze xgboost)
 
 add_executable(assign_weights "app/assign_weights.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)

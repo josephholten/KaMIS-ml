@@ -10,59 +10,9 @@
 #include <omp.h>
 #include <argtable3.h>
 #include <random>
-#include <map>
-#include "../../extern/KaHIP/lib/tools/random_functions.h"
 #include <fstream>
-
-
-static bool str_cmp(const std::string & str1, const std::string & str2) {
-    return str1.size() == str2.size() && std::equal(str1.begin(), str1.end(), str2.begin(), [](unsigned char c1, unsigned char c2){ return std::toupper(c1) == std::toupper(c2); });
-}
-
-enum class graph_family { path, cycle, star, tree, cliques};
-const std::map<graph_family, std::string> family_to_str {
-        {graph_family::path, "path"},
-        {graph_family::cycle, "cycle"},
-        {graph_family::star, "star"},
-        {graph_family::tree, "tree"},
-};
-
-
-struct synth_config {
-    enum class weight_source {UNWEIGHTED, HYBRID, UNIFORM, GEOMETRIC};
-    const std::map<weight_source, std::string> weight_source_to_str {
-            {weight_source::UNWEIGHTED, "unweighted"},
-            {weight_source::HYBRID, "hybrid"},
-            {weight_source::UNIFORM, "uniform"},
-            {weight_source::GEOMETRIC, "geometric"},
-    };
-
-    std::vector<graph_family> types;
-    weight_source source = weight_source::UNWEIGHTED;
-
-    int instances = 1;
-    NodeWeight max_weight = 1;
-    uint seed = 1;
-    int componets = 0;
-
-    void setWeightSource(const std::string & s) {
-        if (str_cmp(s, "hybrid")) {
-            source = weight_source::HYBRID;
-        } else if (str_cmp(s, "uniform")) {
-            source = weight_source::UNIFORM;
-        } else if (str_cmp(s, "geometric")) {
-            source = weight_source::GEOMETRIC;
-        }
-    }
-
-    void serialize(std::ofstream& file) {
-        file << "% components " << componets << std::endl;
-        file << "% max_weight " << max_weight << std::endl;
-        file << "% weight_source " << weight_source_to_str.at(source) << std::endl;
-    }
-
-    NodeID size;
-};
+#include "synthetic_config.h"
+#include "util.h"
 
 /**
  * Parse the given parameters and apply them to the config.

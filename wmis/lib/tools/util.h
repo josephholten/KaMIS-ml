@@ -17,5 +17,6 @@ if (err != 0) {                                                         \
 }
 
 bool validate_path(const std::string& path, bool weak=false);
+static bool str_cmp(const std::string & str1, const std::string & str2);
 
 #endif //MWIS_ML_SAFE_C_API_H

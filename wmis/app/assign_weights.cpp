@@ -18,6 +18,7 @@
 #include "mis_config.h"
 #include "parse_parameters.h"
 #include "branch_and_reduce_algorithm.h"
+#include "graph_builder.h"
 
 void assign_weights(graph_access& G, const MISConfig& mis_config) {
     constexpr NodeWeight MAX_WEIGHT = 200;
@@ -57,8 +58,13 @@ int main(int argc, char** argv) {
 
     // Read the graph
     graph_access G;
-    std::string comments;
-    graph_io::readGraphWeighted(G, graph_filepath, comments);
+    if (mis_config.graph_filename.substr(mis_config.graph_filename.find_last_of('.')) == ".edgelist") {
+        graph_builder builder;
+        builder.build_from_edgelist(G, graph_filepath);
+    } else {
+        graph_io::readGraphWeighted(G, graph_filepath);
+    }
+
     assign_weights(G, mis_config);
 
     graph_io::writeGraphNodeWeighted(G, mis_config.output_filename);
