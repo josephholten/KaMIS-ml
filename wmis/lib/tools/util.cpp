@@ -2,9 +2,6 @@
 // Created by joseph on 10/22/21.
 //
 
-#ifndef MWIS_ML_SAFE_C_API_H
-#define MWIS_ML_SAFE_C_API_H
-
 #include "util.h"
 #include <fstream>
 #include <iostream>
@@ -27,6 +24,3 @@ bool validate_path(const std::string& path, bool weak=false) {
 static bool str_cmp(const std::string & str1, const std::string & str2) {
     return str1.size() == str2.size() && std::equal(str1.begin(), str1.end(), str2.begin(), [](unsigned char c1, unsigned char c2){ return std::toupper(c1) == std::toupper(c2); });
 }
-
-
-#endif //MWIS_ML_SAFE_C_API_H
