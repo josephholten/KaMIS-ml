@@ -29,14 +29,7 @@ public:
         for (auto& neighborhood : adj)
             std::sort(neighborhood.begin(), neighborhood.end());
 
-        std::vector<EdgeID> start;
-        std::vector<NodeID> edge_arr;
-        for (auto neighborhood : adj) {
-            start.push_back(edge_arr.size());
-            std::copy(neighborhood.begin(), neighborhood.end(), std::back_inserter(edge_arr));
-        }
-        start.push_back(edge_arr.size());
-        G.build_from_metis(start, edge_arr, weights);
+        build(G);
     };
 
     void add(NodeID n, graph_family family) {

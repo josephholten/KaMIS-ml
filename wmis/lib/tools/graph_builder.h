@@ -39,6 +39,8 @@ public:
 
         for (NodeID node = 0; node < n; ++node)
             add_node();
+
+        build(G);
     }
 
 protected:
@@ -70,6 +72,17 @@ protected:
     NodeWeight random_weight() {
         return weight_distribution(generator);
     };
+
+    void build(graph_access& G) {
+        std::vector<EdgeID> start;
+        std::vector<NodeID> edge_arr;
+        for (auto neighborhood : adj) {
+            start.push_back(edge_arr.size());
+            std::copy(neighborhood.begin(), neighborhood.end(), std::back_inserter(edge_arr));
+        }
+        start.push_back(edge_arr.size());
+        G.build_from_metis(start, edge_arr, weights);
+    }
 };
 
 #endif //KAMIS_GRAPH_BUILDER_H
