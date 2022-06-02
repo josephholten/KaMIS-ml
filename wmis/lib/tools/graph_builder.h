@@ -14,6 +14,10 @@
 
 class graph_builder {
 public:
+    graph_builder() {
+        weight_distribution = std::uniform_int_distribution<NodeWeight>(1, 100);
+    }
+
     void build_from_edgelist(graph_access& G, const std::string& filepath) {
         std::ifstream file(filepath);
         std::string line;
