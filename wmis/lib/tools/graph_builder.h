@@ -89,7 +89,7 @@ protected:
                 if (!(neighborhood[i] == neighborhood[i+1] || neighborhood[i] == node))
                     edge_arr.push_back(neighborhood[i]);
             }
-            if (neighborhood.size() > 2 && neighborhood[neighborhood.size()-1] != neighborhood[neighborhood.size()-2])
+            if (neighborhood.size() >= 2 && neighborhood[neighborhood.size()-1] != neighborhood[neighborhood.size()-2])
                 edge_arr.push_back(neighborhood[neighborhood.size()-1]);
         }
         start.push_back(edge_arr.size());
