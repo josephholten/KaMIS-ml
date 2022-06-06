@@ -84,7 +84,7 @@ protected:
             auto neighborhood = adj[node];
             start.push_back(edge_arr.size());
             std::sort(neighborhood.begin(), neighborhood.end());
-            for (size_t i = 0; i < neighborhood.size() - 1; ++i) {
+            for (long long i = 0; i < (long long) neighborhood.size() - 1; ++i) {
                 // if neither duplicate nor self loop, copy
                 if (!(neighborhood[i] == neighborhood[i+1] || neighborhood[i] == node))
                     edge_arr.push_back(neighborhood[i]);
