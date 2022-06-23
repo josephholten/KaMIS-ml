@@ -10,7 +10,7 @@
 #include <map>
 #include "util.h"
 
-enum class graph_family { path, cycle, star, tree, cliques};
+enum class graph_family { path, cycle, star, tree, cliques, gnp, ba};
 const std::map<graph_family, std::string> family_to_str {
         {graph_family::path, "path"},
         {graph_family::cycle, "cycle"},
@@ -35,6 +35,9 @@ struct synth_config {
     NodeWeight max_weight = 1;
     uint seed = 1;
     int componets = 0;
+
+    double p = 0;
+    NodeID m = 1;
 
     void setWeightSource(const std::string & s) {
         if (str_cmp(s, "hybrid")) {

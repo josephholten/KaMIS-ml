@@ -47,6 +47,8 @@ int parse_parameters(int argn, char **argv,
     struct arg_str *reduction_style     = arg_str0(NULL, "reduction_style", NULL, "Choose the type of reductions appropriate for the input graph. Can be either: normal/sparse (default), dense/osm.");
     struct arg_int *size                = arg_int0(NULL, "size", NULL, "The size of the synthetic graph");
     struct arg_int *max_weight          = arg_int0(NULL, "max_weight", NULL, "The maximum weight of a node.");
+    struct arg_int *m                   = arg_int0(NULL, "m", NULL, "Number of initial edges (BA)");
+    struct arg_dbl *p                   = arg_dbl0(NULL, "p", NULL, "Connectivity (GNP)");
     struct arg_str *type                = arg_strn(NULL, NULL, "type", 1, 4, "Which types of synthetic graphs to generate.");
     struct arg_end *end                 = arg_end(100);
 
@@ -65,6 +67,8 @@ int parse_parameters(int argn, char **argv,
             size,
             type,
             max_weight,
+            p,
+            m,
             // reduction_style,
             end
     };
@@ -107,6 +111,12 @@ int parse_parameters(int argn, char **argv,
         config.max_weight = max_weight->ival[0];
     }
 
+    if (m->count > 0)
+        config.m = m->ival[0];
+
+    if (p->count > 0)
+        config.p = p->dval[0];
+
     for (int i = 0; i < type->count; ++i) {
         if (str_cmp(type->sval[i], "path"))
             config.types.push_back(graph_family::path);
@@ -116,6 +126,10 @@ int parse_parameters(int argn, char **argv,
             config.types.push_back(graph_family::star);
         else if (str_cmp(type->sval[i], "tree"))
             config.types.push_back(graph_family::tree);
+        else if (str_cmp(type->sval[i], "gnp"))
+            config.types.push_back(graph_family::gnp);
+        else if (str_cmp(type->sval[i], "ba"))
+            config.types.push_back(graph_family::ba);
         else
             std::cerr << "ignoring unknown type " << type->sval[i] << std::endl;
     }
