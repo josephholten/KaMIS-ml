@@ -7,6 +7,7 @@
 #include <xgboost/c_api.h>
 #include <util.h>
 #include <sstream>
+#include <unordered_set>
 
 bool strCompare(const std::string & str1, const std::string & str2) {
     return str1.size() == str2.size() && std::equal(str1.begin(), str1.end(), str2.begin(), [](unsigned char c1, unsigned char c2){ return std::toupper(c1) == std::toupper(c2); });
@@ -29,6 +30,42 @@ bool is_IS(graph_access& G) {
 }
 
 int main(int argc, char** argv) {
+    if (argc == 2) {
+        graph_access G;
+        graph_io::readGraphWeighted(G, argv[1]);
+
+        std::vector<std::unordered_set<NodeID>> edge_sets(G.number_of_nodes());
+
+        bool duplicates = false;
+        bool selfloops = false;
+        forall_nodes(G, node) {
+            forall_out_edges(G, edge, node) {
+                if (G.getEdgeTarget(edge) == node)
+                    selfloops = true;
+
+                if (!edge_sets[node].insert(G.getEdgeTarget(edge)).second)
+                    // if it already exists
+                    duplicates = true;
+            } endfor
+        } endfor
+
+        std::cout << "duplicates: " << (duplicates ? "true" : "false") << std::endl;
+        std::cout << "self loops: " << (selfloops ? "true" : "false") << std::endl;
+
+        bool undirected = true;
+        for(size_t node = 0; node < edge_sets.size() && undirected; ++node) {
+            for(auto neighbor : edge_sets[node]) {
+                if (edge_sets[neighbor].find(node) == edge_sets[neighbor].end()) {
+                    undirected = false;
+                }
+            }
+        }
+
+        std::cout << "undirected: " << (undirected ? "true" : "false") << std::endl;
+
+        return 0;
+    }
+
     if (argc < 3) {
         std::cerr << "Must provide a method and at least one file." << std::endl;
         return 1;
