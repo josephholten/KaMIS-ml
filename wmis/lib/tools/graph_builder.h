@@ -80,17 +80,10 @@ protected:
     void build(graph_access& G) {
         std::vector<EdgeID> start;
         std::vector<NodeID> edge_arr;
-        for (NodeID node = 0; node < adj.size(); ++node) {
-            auto neighborhood = adj[node];
+        for (auto& neighborhood : adj) {
             start.push_back(edge_arr.size());
             std::sort(neighborhood.begin(), neighborhood.end());
-            for (long long i = 0; i < (long long) neighborhood.size() - 1; ++i) {
-                // if neither duplicate nor self loop, copy
-                if (!(neighborhood[i] == neighborhood[i+1] || neighborhood[i] == node))
-                    edge_arr.push_back(neighborhood[i]);
-            }
-            if (neighborhood.size() >= 2 && neighborhood[neighborhood.size()-1] != neighborhood[neighborhood.size()-2] && neighborhood[neighborhood.size()-1] != node)
-                edge_arr.push_back(neighborhood[neighborhood.size()-1]);
+            std::copy(neighborhood.begin(), neighborhood.end(), std::back_inserter(edge_arr));
         }
         start.push_back(edge_arr.size());
         G.build_from_metis(start, edge_arr, weights);

@@ -102,7 +102,6 @@ public:
             for (size_t source = config.m; source < n; ++source)
                 for (size_t target = 0; target < source; ++target)
                     if (random(generator) < (double) degree(target) / (2*edges)) {
-                        std::cout << source+1 << " " << target+1 << std::endl;
                         add_edge(source, target);
                     }
         }
