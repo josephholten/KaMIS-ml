@@ -151,6 +151,8 @@ void ml_features::fillGraph(graph_access& G, std::vector<float>& labels, NodeID 
         std::cerr << "Error: feature matrix was constructed not for labels, so the labels will be discarded.\n";
     }
     calculate_features(G);
+    // flip from 0 -> 1
+    std::transform(labels.begin(), labels.end(), labels.begin(), [](float label){ return 1-label; });
     std::copy(labels.begin(), labels.end(), label_data.begin() + offset);
 }
 
@@ -654,6 +656,16 @@ void ml_features::regularize() {
     feature_matrix = std::move(regularized_feature_matrix);
     current_size   = feature_matrix.size();
     label_data     = std::move(regularized_label_data);
+}
+
+void ml_features::normalize() {
+    for (auto& row : feature_matrix) {
+        float norm = 0;
+        for (auto feature : row)
+            norm += pow(feature,2);
+        norm /= row.size();
+        std::transform(row.begin(), row.end(), row.begin(), [&](float feature) {return feature / norm;});
+    }
 }
 
 bool ml_features::float_approx_eq(float a, float b) {

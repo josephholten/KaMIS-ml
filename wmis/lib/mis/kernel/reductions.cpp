@@ -1144,40 +1144,40 @@ bool ml_reduction::reduce(branch_and_reduce_algorithm* br_alg) {
     if (config.reduction_style == MISConfig::SIMPLE_ML) {
         auto max = std::max_element(prediction.begin(), prediction.end());
         auto node = max - prediction.begin();
-        br_alg->set(reverse_mapping[node], IS_status::included);
+        br_alg->set(reverse_mapping[node], IS_status::excluded);
         return true;
     }
 
-    // sort nodes by their prediction
+    // sort nodes (non-decreasing) by their prediction -> nodes with high prediction will be at the end
     std::vector<NodeID> high_candidates = std::vector<NodeID>(G.number_of_nodes(), 0);
     std::iota(high_candidates.begin(), high_candidates.end(), 0);
     std::sort(high_candidates.begin(), high_candidates.end(),
               [&prediction](const NodeID& n1, const NodeID& n2){ return prediction[n1] < prediction[n2]; }
     );
 
-    // include upper q% of nodes
-    for(size_t index = 0; index < std::ceil(high_candidates.size()*(1-config.ml_pruning)); ++index) {
-        auto node = high_candidates[index];
-        if (status.node_status[reverse_mapping[node]] == IS_status::not_set) {
-            // force high confidence nodes into IS
-            br_alg->set(reverse_mapping[node], IS_status::included);
-            // and exclude all it's neighbors
-            forall_out_edges(G, edge, node) {
-                NodeID neighbor = G.getEdgeTarget(node);
-                if (status.node_status[reverse_mapping[node]] == IS_status::not_set) {
-                    br_alg->set(reverse_mapping[neighbor], IS_status::excluded);
-                }
-            } endfor
-        }
-    }
-
-    // remove lower (1-q)% nodes
-    // for(size_t index = std::floor(high_candidates.size()*(config.ml_pruning)); index < high_candidates.size(); ++index) {
+    // // include upper q% of nodes
+    // for(size_t index = 0; index < std::ceil(high_candidates.size()*(1-config.ml_pruning)); ++index) {
     //     auto node = high_candidates[index];
     //     if (status.node_status[reverse_mapping[node]] == IS_status::not_set) {
-    //         br_alg->set(reverse_mapping[node], IS_status::excluded);
+    //         // force high confidence nodes into IS
+    //         br_alg->set(reverse_mapping[node], IS_status::included);
+    //         // and exclude all it's neighbors
+    //         forall_out_edges(G, edge, node) {
+    //             NodeID neighbor = G.getEdgeTarget(node);
+    //             if (status.node_status[reverse_mapping[node]] == IS_status::not_set) {
+    //                 br_alg->set(reverse_mapping[neighbor], IS_status::excluded);
+    //             }
+    //         } endfor
     //     }
     // }
+
+    // remove nodes with high prediction
+    for(size_t index = std::ceil(high_candidates.size()*config.ml_pruning); index < high_candidates.size(); ++index) {
+        auto node = high_candidates[index];
+        if (status.node_status[reverse_mapping[node]] == IS_status::not_set) {
+            br_alg->set(reverse_mapping[node], IS_status::excluded);
+        }
+    }
 
     return true;  // this reduction needs to always be able to reduce
 }

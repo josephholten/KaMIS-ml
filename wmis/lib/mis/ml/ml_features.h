@@ -94,6 +94,7 @@ public:
     [[nodiscard]] float scale_pos_weight_param() const;
 
     void regularize();
+    void normalize();
 
 private:
     using matrix = std::vector<std::array<float, FEATURE_NUM>>;
