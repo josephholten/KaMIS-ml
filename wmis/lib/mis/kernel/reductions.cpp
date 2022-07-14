@@ -1126,6 +1126,7 @@ bool ml_reduction::reduce(branch_and_reduce_algorithm* br_alg) {
 
     ml_features feature_mat = ml_features(br_alg->config, G);
     feature_mat.initDMatrix();
+    feature_mat.normalize();
 
     // predict
     bst_ulong out_len = 0;
@@ -1142,9 +1143,9 @@ bool ml_reduction::reduce(branch_and_reduce_algorithm* br_alg) {
     // }
 
     if (config.reduction_style == MISConfig::SIMPLE_ML) {
-        auto max = std::max_element(prediction.begin(), prediction.end());
+        auto max = std::min_element(prediction.begin(), prediction.end());
         auto node = max - prediction.begin();
-        br_alg->set(reverse_mapping[node], IS_status::excluded);
+        br_alg->set(reverse_mapping[node], IS_status::included);
         return true;
     }
 
