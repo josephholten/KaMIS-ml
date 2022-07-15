@@ -98,19 +98,23 @@ int main(int argn, char **argv) {
     graph_io::readGraphWeighted(G, graph_filepath, comments);
     assign_weights(G, mis_config);
 
+    algo_log::logger().set_name("iterative_ml");
+    algo_log::logger().instance(graph_filepath);
     mis_log::instance()->set_graph(G);
 
     auto start = std::chrono::system_clock::now();
+    algo_log::logger().start_timer();
 
     branch_and_reduce_algorithm reducer(G, mis_config);
     reducer.run_branch_reduce();
     NodeWeight MWIS_weight = reducer.get_current_is_weight();
 
+    algo_log::logger().end_timer();
     auto end = std::chrono::system_clock::now();
 
     std::chrono::duration<float> branch_reduce_time = end - start;
-    std::cout << "time " << branch_reduce_time.count() << "\n";
-    std::cout << "MIS_weight " << MWIS_weight << "\n";
+    //std::cout << "time " << branch_reduce_time.count() << "\n";
+    //std::cout << "MIS_weight " << MWIS_weight << "\n";
 
     reducer.apply_branch_reduce_solution(G);
 
@@ -125,8 +129,11 @@ int main(int argn, char **argv) {
                 is_weight += G.getNodeWeight(node);
         } endfor
 
-        std::cout << "MIS_weight_check " << is_weight << std::endl;
+        // std::cout << "MIS_weight_check " << is_weight << std::endl;
+        algo_log::logger().solution(is_weight);
     }
+
+    algo_log::logger().write(mis_config.log_file);
 
     if (mis_config.write_graph) graph_io::writeIndependentSet(G, mis_config.output_filename);
 
