@@ -1143,7 +1143,7 @@ bool ml_reduction::reduce(branch_and_reduce_algorithm* br_alg) {
     // }
 
     if (config.reduction_style == MISConfig::SIMPLE_ML) {
-        auto max = std::min_element(prediction.begin(), prediction.end());
+        auto max = std::max_element(prediction.begin(), prediction.end());
         auto node = max - prediction.begin();
         br_alg->set(reverse_mapping[node], IS_status::included);
         return true;
