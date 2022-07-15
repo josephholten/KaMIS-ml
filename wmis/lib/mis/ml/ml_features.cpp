@@ -152,7 +152,7 @@ void ml_features::fillGraph(graph_access& G, std::vector<float>& labels, NodeID 
     }
     calculate_features(G);
     // flip from 0 -> 1
-    std::transform(labels.begin(), labels.end(), labels.begin(), [](float label){ return 1-label; });
+    // std::transform(labels.begin(), labels.end(), labels.begin(), [](float label){ return 1-label; });
     std::copy(labels.begin(), labels.end(), label_data.begin() + offset);
 }
 
