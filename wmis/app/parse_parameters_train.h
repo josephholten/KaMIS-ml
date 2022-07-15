@@ -42,6 +42,7 @@ int parse_parameters_train(int argn, char **argv,
     struct arg_str *model               = arg_str0(NULL, "model", NULL, "Where to save the model");
     struct arg_int *iterations          = arg_int0(NULL, "iterations", NULL, "How many boost iterations to perform.");
     struct arg_int *max_depth           = arg_int0(NULL, "max_depth", NULL, "Maximum depth of the decision trees.");
+    struct arg_lit *only_data           = arg_lit0(NULL, "only_data", "Export the training data to file.");
 
     struct arg_end *end                 = arg_end(100);
 
@@ -60,6 +61,7 @@ int parse_parameters_train(int argn, char **argv,
             ls_time,
             ls_updates,
             model,
+            only_data,
             end
     };
 
@@ -142,7 +144,11 @@ int parse_parameters_train(int argn, char **argv,
             std::cerr << "train-model: ERROR: Please provide a valid ml model path." << std::endl;
             exit(1);
         }
-    } 
+    }
+
+    if (only_data->count > 0) {
+        mis_config.only_data = true;
+    }
 
     arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
 

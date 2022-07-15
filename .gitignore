@@ -44,3 +44,4 @@ cmake-*
 # IDE
 .idea
 .*.sw?
+venv

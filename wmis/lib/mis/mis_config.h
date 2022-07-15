@@ -62,6 +62,8 @@ struct MISConfig {
     std::string model;
     //Where to save the log
     std::string log_file;
+    //Output data to model file
+    bool only_data = false;
 
 
     void setReductionStyle(const std::string & redu_style) {

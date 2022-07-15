@@ -95,6 +95,7 @@ public:
 
     void regularize();
     void normalize();
+    void to_file(std::string filepath);
 
 private:
     using matrix = std::vector<std::array<float, FEATURE_NUM>>;

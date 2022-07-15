@@ -684,3 +684,19 @@ float ml_features::scale_pos_weight_param() const {
 
     return (float) number_of_negative / (float) number_of_positive;
 }
+
+void ml_features::to_file(std::string filepath) {
+    std::ofstream data_file {filepath + ".features"};
+    std::ofstream label_file {filepath + ".labels"};
+
+    for (size_t row = 0; row < getRows(); ++row) {
+        for (size_t col = 0; col < getCols(); ++col) {
+            data_file << feature_matrix[row][col] << " ";
+        }
+        std::cout << "\n";
+    }
+
+    for (size_t row = 0; row < getRows(); ++row) {
+        label_file << label_data[row] << "\n";
+    }
+}
