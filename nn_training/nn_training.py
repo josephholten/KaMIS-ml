@@ -7,17 +7,16 @@ from sklearn.preprocessing import MinMaxScaler
 
 import sys
 
-# number of features
-feature_num = sys.argv[1]
-
 # load features and labels
-data_path = sys.argv[2]
+data_path = sys.argv[1]
 train_data_path = data_path + ".train"
 test_data_path = data_path + ".test"
 
 print("Reading data")
 features = np.loadtxt(train_data_path + ".features")
 labels = np.loadtxt(train_data_path + ".labels")
+
+feature_num = np.shape(features)[1]
 
 # split into test/ train randomly
 features_train, features_test, labels_train, labels_test = train_test_split(features, labels, test_size=0.1)
@@ -52,7 +51,6 @@ print("Compiling model")
 model.compile(
     optimizer="Adam",
     loss="MeanSquaredError",
-    metric="MeanSquaredError"
 )
 backend.set_value(model.optimizer.learning_rate, 0.001)
 

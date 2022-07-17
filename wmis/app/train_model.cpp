@@ -61,9 +61,6 @@ int main(int argn, char** argv) {
         return 0;
     }
 
-    // initialize DMatrices in with feature and label data
-    train_features.initDMatrix();
-    test_features.initDMatrix();
 
     // create booster
     BoosterHandle booster;

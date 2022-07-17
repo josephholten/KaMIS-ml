@@ -6,6 +6,7 @@
 
 #include <random>
 #include <unordered_set>
+#include <fstream>
 
 #include "mis_config.h"
 #include "configuration_mis.h"
@@ -66,6 +67,7 @@ ml_features::ml_features(const MISConfig& config, graph_access &G)
     mis_config.ls_rounds = config.ls_rounds;
     reserveNodes(G.number_of_nodes());
     fillGraph(G);
+    initDMatrix();
 }
 
 // for reducing (single graph without labels)
@@ -81,6 +83,7 @@ ml_features::ml_features(const MISConfig& config, const weighted_dynamic_graph &
     mis_config.ls_rounds = config.ls_rounds;
     reserveNodes(nodes.size());
     fillGraph(G, nodes);
+    initDMatrix();
 }
 
 ml_features::~ml_features() {
@@ -122,6 +125,7 @@ void ml_features::fromPaths(const std::vector<std::string> &all_graph_paths, con
 
         fillGraph(G, labels, offsets[i]);
     }
+    initDMatrix();
 }
 
 // init
@@ -151,8 +155,6 @@ void ml_features::fillGraph(graph_access& G, std::vector<float>& labels, NodeID 
         std::cerr << "Error: feature matrix was constructed not for labels, so the labels will be discarded.\n";
     }
     calculate_features(G);
-    // flip from 0 -> 1
-    // std::transform(labels.begin(), labels.end(), labels.begin(), [](float label){ return 1-label; });
     std::copy(labels.begin(), labels.end(), label_data.begin() + offset);
 }
 
@@ -686,17 +688,17 @@ float ml_features::scale_pos_weight_param() const {
 }
 
 void ml_features::to_file(std::string filepath) {
-    std::ofstream data_file {filepath + ".features"};
-    std::ofstream label_file {filepath + ".labels"};
+    std::ofstream data_file (filepath + ".features");
 
-    for (size_t row = 0; row < getRows(); ++row) {
-        for (size_t col = 0; col < getCols(); ++col) {
-            data_file << feature_matrix[row][col] << " ";
+    for (const auto row : feature_matrix) {
+        for (const auto feature : row) {
+            data_file << feature << " ";
         }
-        std::cout << "\n";
+        data_file << "\n";
     }
 
-    for (size_t row = 0; row < getRows(); ++row) {
-        label_file << label_data[row] << "\n";
+    std::ofstream label_file (filepath + ".labels");
+    for (const auto label : label_data) {
+        label_file << label << "\n";
     }
 }
