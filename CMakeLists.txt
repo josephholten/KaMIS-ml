@@ -56,7 +56,7 @@ add_definitions(-Wno-unused-result)
 endif()
 
 # check dependencies
-#find_package(OpenMP)
+find_package(OpenMP)
 if(OpenMP_CXX_FOUND)
   message(STATUS "OpenMP support detected")
   add_definitions(${OpenMP_CXX_FLAGS})

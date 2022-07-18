@@ -92,7 +92,7 @@ public:
     void initDMatrix();
     DMatrixHandle getDMatrix();
 
-    matrix::iterator getRow(NodeID node) { return feature_matrix.begin() + node; }
+    const std::array<float,16>& getRow(NodeID node) { return feature_matrix[node]; }
 
     std::vector<std::array<float, FEATURE_NUM>>::iterator begin() { return feature_matrix.begin(); }
     std::vector<std::array<float, FEATURE_NUM>>::iterator end() { return feature_matrix.end(); }

@@ -1109,7 +1109,7 @@ bool ml_reduction::reduce(branch_and_reduce_algorithm* br_alg) {
 
     // init model on first reduction run
     if (!booster_model_loaded) {
-        load_model(MISConfig::model);
+        load_model(config.model);
         booster_model_loaded = true;
     }
 
@@ -1193,7 +1193,7 @@ void ml_reduction::apply(branch_and_reduce_algorithm *br_alg) {
 
 }
 
-nn_reduction::nn_reduction(size_t n) : general_reduction(n), model {fdeep::load_model(MISConfig::model)} {
+nn_reduction::nn_reduction(size_t n) : general_reduction(n) {
 }
 
 bool nn_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
@@ -1202,6 +1202,10 @@ bool nn_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
 
     if (status.remaining_nodes <= 0)
         return false;
+
+    if (model.is_nothing()) {
+        model = fplus::just(fdeep::load_model(config.model));
+    }
 
     // current (kamis-reduced) graph
     graph_access G;
@@ -1217,9 +1221,9 @@ bool nn_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
     float max_prediction = 0;
     NodeID max_node = 0;
     forall_nodes(G, node) {
-        std::vector<float> row (feature_mat.getRow(node), feature_mat.getRow(node) + ml_features::FEATURE_NUM);
+        std::vector<float> row (feature_mat.getRow(node).begin(), feature_mat.getRow(node).end());
         const fdeep::tensor row_tensor(fdeep::tensor_shape(static_cast<std::size_t>(ml_features::FEATURE_NUM)), row);
-        float prediction = model.predict_single_output({row_tensor});
+        float prediction = model.unsafe_get_just().predict_single_output({row_tensor});
         if (prediction > max_prediction) {
             max_prediction = prediction;
             max_node = node;

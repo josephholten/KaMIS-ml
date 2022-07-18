@@ -59,7 +59,7 @@ struct MISConfig {
     // How aggresively to prune vertices based on the ML prediction
     float ml_pruning;
     // Where to load/ save the model
-    static std::string model;
+    std::string model;
     //Where to save the log
     std::string log_file;
     //Output data to model file

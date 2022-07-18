@@ -165,13 +165,13 @@ int parse_parameters_ml(int argn, char **argv,
         // check if absolute path
         std::filesystem::path model_path(model->sval[0]);
         if (model_path.is_absolute())
-            MISConfig::model = model_path.string();
+            mis_config.model = model_path.string();
 
         // otherwise assume relative to MODEL_DIR
         else {
             model_path = MODEL_DIR;
             model_path.append(model->sval[0]);
-            MISConfig::model = model_path.string();
+            mis_config.model = model_path.string();
         }
         // check if valid path
         if (std::ifstream model_file(model_path); !model_file) {

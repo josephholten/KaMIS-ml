@@ -277,7 +277,7 @@ struct nn_reduction : public general_reduction {
     virtual void apply(branch_and_reduce_algorithm* br_alg) final;
 
 private:
-    fdeep::model model;
+    fplus::maybe<fdeep::model> model;
 };
 
 struct greedy_reduction : public general_reduction {
