@@ -18,6 +18,8 @@ if (CMAKE_BUILD_TYPE STREQUAL Release)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -march=native -DNDEBUG -fPIC -O3")
 endif(CMAKE_BUILD_TYPE STREQUAL Release)
 
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fPIC -fopenmp")
+
 CHECK_CXX_COMPILER_FLAG(-Wno-unused-value COMPILER_SUPPORTS_NOUNUSED)
 if(COMPILER_SUPPORTS_NOUNUSED)
 add_definitions(-Wno-unused-value)
