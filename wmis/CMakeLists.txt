@@ -154,7 +154,10 @@ include_directories(
         extern/KaHIP/lib/partition/uncoarsening/refinement/quotient_graph_refinement/flow_refinement
         extern/KaHIP/lib/tools
 
-        extern
+        extern/frugally-deep/include
+        extern/eigen/
+        extern/FunctionalPlus/include
+        extern/FunctionalPlus/include_all_in_one/include/
         extern/xgboost/include
         extern/json/include
         extern/json/single_include
