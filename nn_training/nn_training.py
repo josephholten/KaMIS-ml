@@ -12,9 +12,12 @@ data_path = sys.argv[1]
 train_data_path = data_path + ".train"
 test_data_path = data_path + ".test"
 
+model_path = data_path + ".nn_model.h5"
+
 print("Reading data")
 features = np.loadtxt(train_data_path + ".features")
 labels = np.loadtxt(train_data_path + ".labels")
+
 
 feature_num = np.shape(features)[1]
 
@@ -62,5 +65,7 @@ history = model.fit(
     epochs=10,
     validation_data=(features_test, features_train)
 )
+
+model.save(model_path, include_optimizer=False)
 
 # 10 epochs, 128 batch size, 0.001 learning rate
