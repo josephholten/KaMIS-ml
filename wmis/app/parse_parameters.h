@@ -124,16 +124,13 @@ int parse_parameters(int argn, char **argv,
 
     if (output->count > 0) {
         mis_config.output_filename = output->sval[0];
+        mis_config.log_file = std::string(output->sval[0]).substr(0,mis_config.output_filename.find_last_of("."));
+        mis_config.log_file.append(".log");
         validate_path(mis_config.output_filename);
 
         mis_config.write_graph = true;
     } else {
         mis_config.write_graph = false;
-    }
-
-    if (log_file->count > 0) {
-        mis_config.log_file = log_file->sval[0];
-        validate_path(mis_config.log_file);
     }
 
     arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
