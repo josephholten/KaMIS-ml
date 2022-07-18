@@ -101,6 +101,7 @@ public:
 
     void regularize();
     void normalize();
+    void min_max_normalize();
     void to_file(std::string filepath);
 
 private:

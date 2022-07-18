@@ -1211,7 +1211,7 @@ bool nn_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
 
     ml_features feature_mat = ml_features(br_alg->config, G);
     feature_mat.initDMatrix();
-    // min-max normalize
+    feature_mat.min_max_normalize();
 
     // for row in feature matrix
     float max_prediction = 0;
@@ -1219,8 +1219,11 @@ bool nn_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
     forall_nodes(G, node) {
         std::vector<float> row (feature_mat.getRow(node), feature_mat.getRow(node) + ml_features::FEATURE_NUM);
         const fdeep::tensor row_tensor(fdeep::tensor_shape(static_cast<std::size_t>(ml_features::FEATURE_NUM)), row);
-        if (model.predict_single_output({row_tensor}) > max_prediction)
+        float prediction = model.predict_single_output({row_tensor});
+        if (prediction > max_prediction) {
+            max_prediction = prediction;
             max_node = node;
+        }
     } endfor
 
     br_alg->set(max_node, IS_status::included);

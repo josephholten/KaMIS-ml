@@ -702,3 +702,20 @@ void ml_features::to_file(std::string filepath) {
         label_file << label << "\n";
     }
 }
+
+void ml_features::min_max_normalize() {
+    std::array<float,FEATURE_NUM> max_values {0};
+    std::array<float,FEATURE_NUM> min_values {0};
+    for (const auto row : feature_matrix) {
+        for (size_t i = 0; i < getCols(); ++i) {
+            if (row[i] > max_values[i])
+                max_values[i] = row[i];
+            if (row[i] < min_values[i])
+                min_values[i] = row[i];
+        }
+    }
+    for (auto row : feature_matrix)
+        for (size_t i = 0; i < FEATURE_NUM; ++i)
+            row[i] = (row[i] - min_values[i]) / (max_values[i] - min_values[i]);
+
+}
