@@ -7,3 +7,6 @@
 [submodule "wmis/extern/algo_test"]
 	path = wmis/extern/algo_test
 	url = https://github.com/josephholten/algo_test.git
+[submodule "wmis/extern/docopt.cpp"]
+	path = wmis/extern/docopt.cpp
+	url = https://github.com/docopt/docopt.cpp.git

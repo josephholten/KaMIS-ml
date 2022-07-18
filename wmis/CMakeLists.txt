@@ -154,6 +154,7 @@ include_directories(
         extern/KaHIP/lib/partition/uncoarsening/refinement/quotient_graph_refinement/flow_refinement
         extern/KaHIP/lib/tools
 
+        extern
         extern/xgboost/include
         extern/json/include
         extern/json/single_include
@@ -190,6 +191,7 @@ set(ML_SOURCES
 
 add_subdirectory(extern/xgboost)
 add_subdirectory(extern/json)
+add_subdirectory(extern/docopt.cpp)
 
 add_library(libml OBJECT ${ML_SOURCES} lib/tools/graph_builder.h)
 target_link_libraries(libml nlohmann_json::nlohmann_json)
@@ -233,3 +235,6 @@ target_link_libraries(metis_to_dot xgboost)
 
 add_executable(gen_synthetics "app/gen_synthetics.cpp" $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
 target_link_libraries(gen_synthetics xgboost)
+
+add_executable(simple_nn "app/simple_nn.cpp"  $<TARGET_OBJECTS:libkaffpa2> $<TARGET_OBJECTS:libsources> $<TARGET_OBJECTS:libml>)
+target_link_libraries(simple_nn xgboost)

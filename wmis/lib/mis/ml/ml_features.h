@@ -71,6 +71,7 @@ private:
 
 public:
     static constexpr int FEATURE_NUM = FEATURE_NUM_ENUM;
+    using matrix = std::vector<std::array<float, FEATURE_NUM>>;
 
     explicit ml_features(const MISConfig& config, const weighted_dynamic_graph &G, const std::vector<NodeID> &nodes);
     explicit ml_features(const MISConfig& config, graph_access& G);   // for single graph
@@ -91,6 +92,11 @@ public:
     void initDMatrix();
     DMatrixHandle getDMatrix();
 
+    matrix::iterator getRow(NodeID node) { return feature_matrix.begin() + node; }
+
+    std::vector<std::array<float, FEATURE_NUM>>::iterator begin() { return feature_matrix.begin(); }
+    std::vector<std::array<float, FEATURE_NUM>>::iterator end() { return feature_matrix.end(); }
+
     [[nodiscard]] float scale_pos_weight_param() const;
 
     void regularize();
@@ -98,7 +104,6 @@ public:
     void to_file(std::string filepath);
 
 private:
-    using matrix = std::vector<std::array<float, FEATURE_NUM>>;
     static_assert(ml_features::FEATURE_NUM == FEATURE_NUM_ENUM, "assure ml_features::FEATURE_NUM is correct");
     static constexpr float eps = 1e-4;
 

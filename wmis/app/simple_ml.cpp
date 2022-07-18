@@ -78,7 +78,8 @@ int main(int argn, char **argv) {
         validate_path(mis_config.output_filename);
 
     // always choose the machine learning reductions
-    mis_config.reduction_style = MISConfig::SIMPLE_ML;
+    if (mis_config.reduction_style != MISConfig::SIMPLE_NN)
+        mis_config.reduction_style = MISConfig::SIMPLE_ML;
 
     mis_config.graph_filename = graph_filepath.substr(graph_filepath.find_last_of('/') + 1);
     algo_log::logger().instance(graph_filepath);

@@ -46,6 +46,7 @@ int parse_parameters_ml(int argn, char **argv,
     struct arg_dbl *ml_pruning          = arg_dbl0(NULL, "ml_pruning", NULL, "How aggresively to prune vertices based on the ML prediction");
     struct arg_str *model               = arg_str0(NULL, "model", NULL, "Where to load/ save the model");
     struct arg_str *log_file            = arg_str0(NULL, "log_file", NULL, "Path to the log file.");
+    struct arg_lit *nn                  = arg_lit0(NULL, "nn", "Use neural network reduction.");
 
     struct arg_end *end                 = arg_end(100);
 
@@ -67,6 +68,7 @@ int parse_parameters_ml(int argn, char **argv,
             ls_updates,
             ml_pruning,
             model,
+            nn,
             log_file,
             end
     };
@@ -155,17 +157,21 @@ int parse_parameters_ml(int argn, char **argv,
         mis_config.ml_pruning = (float) ml_pruning->dval[0];
     }
 
+    if (nn->count > 0) {
+        mis_config.reduction_style = MISConfig::SIMPLE_NN;
+    }
+
     if (model->count > 0) {
         // check if absolute path
         std::filesystem::path model_path(model->sval[0]);
         if (model_path.is_absolute())
-            mis_config.model = model_path.string();
+            MISConfig::model = model_path.string();
 
         // otherwise assume relative to MODEL_DIR
         else {
             model_path = MODEL_DIR;
             model_path.append(model->sval[0]);
-            mis_config.model = model_path.string();
+            MISConfig::model = model_path.string();
         }
         // check if valid path
         if (std::ifstream model_file(model_path); !model_file) {

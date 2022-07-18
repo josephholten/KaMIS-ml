@@ -11,6 +11,7 @@
 #include "fast_set.h"
 #include "data_structure/sized_vector.h"
 #include "data_structure/dynamic_graph.h"
+#include "fdeep/fdeep.hpp"
 
 // system includes
 #include <vector>
@@ -20,7 +21,7 @@
 
 class branch_and_reduce_algorithm;
 
-enum reduction_type { neighborhood, fold2, clique, critical_set, clique_neighborhood_fast, clique_neighborhood, twin, domination, generalized_neighborhood, generalized_fold, ml, greedy };
+enum reduction_type { neighborhood, fold2, clique, critical_set, clique_neighborhood_fast, clique_neighborhood, twin, domination, generalized_neighborhood, generalized_fold, ml, greedy, nn };
 constexpr size_t REDUCTION_NUM = 12;
 
 class vertex_marker {
@@ -263,6 +264,20 @@ struct ml_reduction : public general_reduction {
 private:
     BoosterHandle booster;
     bool booster_model_loaded = false;
+};
+
+struct nn_reduction : public general_reduction {
+    nn_reduction(size_t n);
+    ~nn_reduction() {};
+    virtual nn_reduction* clone() const final { return new nn_reduction(*this); }
+
+    virtual reduction_type get_reduction_type() const final { return reduction_type::nn; }
+    virtual bool reduce(branch_and_reduce_algorithm* br_alg) final;
+    virtual void restore(branch_and_reduce_algorithm* br_alg) final;
+    virtual void apply(branch_and_reduce_algorithm* br_alg) final;
+
+private:
+    fdeep::model model;
 };
 
 struct greedy_reduction : public general_reduction {

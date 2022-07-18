@@ -37,6 +37,7 @@ int main(int argn, char** argv) {
     if (ret_code) {
         return ret_code;
     }
+    MODEL_PATH = mis_config.model;
 
     std::string train_graphs_path("train_graphs_list.txt");
     std::string train_labels_path("train_labels_list.txt");

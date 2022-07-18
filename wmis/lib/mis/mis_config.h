@@ -16,7 +16,7 @@
 // Configuration for the calculation of the MIS
 struct MISConfig {
     enum Weight_Source {FILE, HYBRID, UNIFORM, GEOMETRIC};
-    enum Reduction_Style {NORMAL, DENSE, ML, GREEDY, SIMPLE_ML};
+    enum Reduction_Style {NORMAL, DENSE, ML, GREEDY, SIMPLE_ML, SIMPLE_NN};
 
     // Name of the graph file.
     std::string graph_filename;
@@ -59,7 +59,7 @@ struct MISConfig {
     // How aggresively to prune vertices based on the ML prediction
     float ml_pruning;
     // Where to load/ save the model
-    std::string model;
+    static std::string model;
     //Where to save the log
     std::string log_file;
     //Output data to model file

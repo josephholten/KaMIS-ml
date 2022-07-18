@@ -7,12 +7,12 @@
 #include "branch_and_reduce_algorithm.h"
 #include "data_structure/flow_graph.h"
 #include "algorithms/push_relabel.h"
+#include "fdeep/fdeep.hpp"
 
 #include <utility>
 #include "util.h"
 #include <ml_features.h>
 #include <numeric>
-
 
 typedef branch_and_reduce_algorithm::IS_status IS_status;
 
@@ -1109,7 +1109,7 @@ bool ml_reduction::reduce(branch_and_reduce_algorithm* br_alg) {
 
     // init model on first reduction run
     if (!booster_model_loaded) {
-        load_model(br_alg->config.model);
+        load_model(MISConfig::model);
         booster_model_loaded = true;
     }
 
@@ -1192,6 +1192,44 @@ void ml_reduction::restore(branch_and_reduce_algorithm *br_alg) {
 void ml_reduction::apply(branch_and_reduce_algorithm *br_alg) {
 
 }
+
+nn_reduction::nn_reduction(size_t n) : general_reduction(n), model {fdeep::load_model(MISConfig::model)} {
+}
+
+bool nn_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
+    auto& config = br_alg->config;
+    auto& status = br_alg->status;
+
+    if (status.remaining_nodes <= 0)
+        return false;
+
+    // current (kamis-reduced) graph
+    graph_access G;
+    // from new NodeID's to old
+    std::vector<NodeID> reverse_mapping(br_alg->get_remaining_nodes(), -1);
+    br_alg->build_graph_access(G, reverse_mapping);
+
+    ml_features feature_mat = ml_features(br_alg->config, G);
+    feature_mat.initDMatrix();
+    // min-max normalize
+
+    // for row in feature matrix
+    float max_prediction = 0;
+    NodeID max_node = 0;
+    forall_nodes(G, node) {
+        std::vector<float> row (feature_mat.getRow(node), feature_mat.getRow(node) + ml_features::FEATURE_NUM);
+        const fdeep::tensor row_tensor(fdeep::tensor_shape(static_cast<std::size_t>(ml_features::FEATURE_NUM)), row);
+        if (model.predict_single_output({row_tensor}) > max_prediction)
+            max_node = node;
+    } endfor
+
+    br_alg->set(max_node, IS_status::included);
+
+    return true;
+}
+
+void nn_reduction::restore(branch_and_reduce_algorithm *br_alg) {}
+void nn_reduction::apply(branch_and_reduce_algorithm *br_alg) {}
 
 bool greedy_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
     auto &status = br_alg->status;
