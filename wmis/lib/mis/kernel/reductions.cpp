@@ -1218,7 +1218,7 @@ bool nn_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
     feature_mat.min_max_normalize();
 
     // for row in feature matrix
-    float max_prediction = 0;
+    float max_prediction = std::numeric_limits<float>::lowest();
     NodeID max_node = 0;
     forall_nodes(G, node) {
         std::vector<float> row (feature_mat.getRow(node).begin(), feature_mat.getRow(node).end());
@@ -1230,7 +1230,7 @@ bool nn_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
         }
     } endfor
 
-    br_alg->set(max_node, IS_status::included);
+    br_alg->set(reverse_mapping[max_node], IS_status::included);
 
     return true;
 }
