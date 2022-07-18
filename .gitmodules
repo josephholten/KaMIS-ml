@@ -10,3 +10,12 @@
 [submodule "wmis/extern/docopt.cpp"]
 	path = wmis/extern/docopt.cpp
 	url = https://github.com/docopt/docopt.cpp.git
+[submodule "wmis/extern/frugally-deep"]
+	path = wmis/extern/frugally-deep
+	url = https://github.com/Dobiasd/frugally-deep.git
+[submodule "wmis/extern/FunctionalPlus"]
+	path = wmis/extern/FunctionalPlus
+	url = https://github.com/Dobiasd/FunctionalPlus
+[submodule "wmis/extern/eigen"]
+	path = wmis/extern/eigen
+	url = https://gitlab.com/libeigen/eigen.git
