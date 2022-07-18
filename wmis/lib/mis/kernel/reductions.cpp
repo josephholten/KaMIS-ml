@@ -1126,7 +1126,7 @@ bool ml_reduction::reduce(branch_and_reduce_algorithm* br_alg) {
 
     ml_features feature_mat = ml_features(br_alg->config, G);
     feature_mat.initDMatrix();
-    feature_mat.normalize();
+    // feature_mat.normalize();
 
     // predict
     bst_ulong out_len = 0;
