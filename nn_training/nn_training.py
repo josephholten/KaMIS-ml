@@ -63,7 +63,7 @@ history = model.fit(
     labels_train,
     batch_size=64,
     epochs=10,
-    validation_data=(features_test, features_train)
+    validation_data=(features_test, labels_test)
 )
 
 model.save(model_path, include_optimizer=False)
