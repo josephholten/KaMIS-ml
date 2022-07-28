@@ -12,6 +12,7 @@
 #include "data_structure/sized_vector.h"
 #include "data_structure/dynamic_graph.h"
 #include "fdeep/fdeep.hpp"
+#include "priority_queue.h"
 
 // system includes
 #include <vector>
@@ -278,6 +279,7 @@ struct nn_reduction : public general_reduction {
 
 private:
     fplus::maybe<fdeep::model> model;
+    priority_queue<float, priority_direction::MAX> queue;
 };
 
 struct greedy_reduction : public general_reduction {
