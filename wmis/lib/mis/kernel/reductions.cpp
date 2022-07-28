@@ -1235,15 +1235,14 @@ bool nn_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
       //  if (status.node_status[marker.current_vertex(v_idx)] == IS_status::not_set) {
       //      NodeID node = mapping[marker.current_vertex(v_idx)];
     forall_nodes(G,node) {
-            std::vector<float> row (feature_mat.getRow(node).begin(), feature_mat.getRow(node).end());
-            const fdeep::tensor row_tensor(fdeep::tensor_shape(static_cast<std::size_t>(ml_features::FEATURE_NUM)), row);
-            float prediction = model.unsafe_get_just().predict_single_output({row_tensor});
-            if (prediction > max_prediction) {
-                max_prediction = prediction;
-                max_node = node;
-            }
-        } endfor
-    }
+        std::vector<float> row (feature_mat.getRow(node).begin(), feature_mat.getRow(node).end());
+        const fdeep::tensor row_tensor(fdeep::tensor_shape(static_cast<std::size_t>(ml_features::FEATURE_NUM)), row);
+        float prediction = model.unsafe_get_just().predict_single_output({row_tensor});
+        if (prediction > max_prediction) {
+            max_prediction = prediction;
+            max_node = node;
+        }
+    } endfor
 
     std::cout << "predicting " << (algo_log::logger().get_time() - start).count() << std::endl;
 
