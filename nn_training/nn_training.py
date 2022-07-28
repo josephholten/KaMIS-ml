@@ -7,8 +7,11 @@ from sklearn.preprocessing import MinMaxScaler
 
 import sys
 
+MODEL_PATH = "/home/jholten/KaMIS-ml/models/"
+
 # load features and labels
-data_path = sys.argv[1]
+data_path = MODEL_PATH + sys.argv[1]
+
 train_data_path = data_path + ".train"
 test_data_path = data_path + ".test"
 
@@ -18,6 +21,8 @@ print("Reading data")
 features = np.loadtxt(train_data_path + ".features")
 labels = np.loadtxt(train_data_path + ".labels")
 
+if np.shape(features)[0] != np.shape(labels)[0]:
+    print("Unmatching labels and features")
 
 feature_num = np.shape(features)[1]
 
@@ -35,7 +40,7 @@ features_test = scaler.transform(features_test)
 # Define Sequential model with 3 layers
 model = keras.Sequential(
     [
-        layers.Input(shape=(feature_num,)),
+        layers.Input(shape=(feature_num,), name="input"),
         layers.Dense(512, activation="relu"),
         layers.Dropout(0.2),
         layers.Dense(512, activation="relu"),
@@ -62,10 +67,12 @@ history = model.fit(
     features_train,
     labels_train,
     batch_size=64,
-    epochs=10,
+    epochs=20,
     validation_data=(features_test, labels_test)
 )
 
-model.save(model_path, include_optimizer=False)
+
+print("Saving to", model_path)
+model.save(model_path)
 
 # 10 epochs, 128 batch size, 0.001 learning rate
