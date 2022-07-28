@@ -1195,7 +1195,7 @@ void ml_reduction::apply(branch_and_reduce_algorithm *br_alg) {
 
 }
 
-nn_reduction::nn_reduction(size_t n) : general_reduction(n) {
+nn_reduction::nn_reduction(size_t n) : general_reduction(n), queue(n) {
 }
 
 bool nn_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
@@ -1230,7 +1230,6 @@ bool nn_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
     start = algo_log::logger().get_time();
     // for row in feature matrix
     float max_prediction = std::numeric_limits<float>::lowest();
-    NodeID max_node = 0;
     for (int v_idx = 0; v_idx < marker.current_size(); ++v_idx) {
         NodeID original_node_id = marker.current_vertex(v_idx);
         if (status.node_status[marker.current_vertex(v_idx)] == IS_status::not_set) {
@@ -1246,7 +1245,13 @@ bool nn_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
 
     std::cout << "predicting " << (algo_log::logger().get_time() - start).count() << std::endl;
 
-    br_alg->set(queue.pop(), IS_status::included);
+    while(!queue.empty()) {
+        NodeID top = queue.pop();
+        if (status.node_status[top] == IS_status::not_set) {
+            br_alg->set(top, IS_status::included);
+            break;
+        }
+    }
 
     return true;
 }
