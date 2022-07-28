@@ -14,6 +14,8 @@
 #include <ml_features.h>
 #include <numeric>
 
+#include "algo_log.h"
+
 typedef branch_and_reduce_algorithm::IS_status IS_status;
 
 bool neighborhood_reduction::reduce(branch_and_reduce_algorithm* br_alg) {
@@ -1207,28 +1209,43 @@ bool nn_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
         model = fplus::just(fdeep::load_model(config.model));
     }
 
+    auto start = algo_log::logger().get_time();
     // current (kamis-reduced) graph
     graph_access G;
     // from new NodeID's to old
     std::vector<NodeID> reverse_mapping(br_alg->get_remaining_nodes(), -1);
-    br_alg->build_graph_access(G, reverse_mapping);
+    std::vector<NodeID> mapping;
+    br_alg->build_graph_access(G, reverse_mapping, mapping);
+
+    std::cout << "building static graph " << (algo_log::logger().get_time() - start).count() << std::endl;
+
+    start = algo_log::logger().get_time();
 
     ml_features feature_mat = ml_features(br_alg->config, G);
     feature_mat.initDMatrix();
     feature_mat.min_max_normalize();
 
+    std::cout << "calculating features " << (algo_log::logger().get_time() - start).count() << std::endl;
+
+    start = algo_log::logger().get_time();
     // for row in feature matrix
     float max_prediction = std::numeric_limits<float>::lowest();
     NodeID max_node = 0;
-    forall_nodes(G, node) {
-        std::vector<float> row (feature_mat.getRow(node).begin(), feature_mat.getRow(node).end());
-        const fdeep::tensor row_tensor(fdeep::tensor_shape(static_cast<std::size_t>(ml_features::FEATURE_NUM)), row);
-        float prediction = model.unsafe_get_just().predict_single_output({row_tensor});
-        if (prediction > max_prediction) {
-            max_prediction = prediction;
-            max_node = node;
+    for (int v_idx = 0; v_idx < marker.current_size(); ++v_idx) {
+        if (status.node_status[marker.current_vertex(v_idx)] == IS_status::not_set) {
+            NodeID node = mapping[marker.current_vertex(v_idx)];
+
+            std::vector<float> row (feature_mat.getRow(node).begin(), feature_mat.getRow(node).end());
+            const fdeep::tensor row_tensor(fdeep::tensor_shape(static_cast<std::size_t>(ml_features::FEATURE_NUM)), row);
+            float prediction = model.unsafe_get_just().predict_single_output({row_tensor});
+            if (prediction > max_prediction) {
+                max_prediction = prediction;
+                max_node = node;
+            }
         }
-    } endfor
+    }
+
+    std::cout << "predicting " << (algo_log::logger().get_time() - start).count() << std::endl;
 
     br_alg->set(reverse_mapping[max_node], IS_status::included);
 

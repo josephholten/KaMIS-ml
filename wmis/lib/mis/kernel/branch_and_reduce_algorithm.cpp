@@ -27,7 +27,11 @@ branch_and_reduce_algorithm::branch_and_reduce_algorithm(graph_access& G, const 
         global_status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, generalized_fold_reduction>(
                 global_status.n);
     } else if (config.reduction_style == MISConfig::Reduction_Style::ML) {
-        global_status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, clique_neighborhood_reduction, critical_set_reduction, generalized_fold_reduction, ml_reduction>(global_status.n);
+        global_status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, clique_neighborhood_reduction, critical_set_reduction, generalized_fold_reduction, ml_reduction>(
+                global_status.n);
+    } else if (config.reduction_style == MISConfig::Reduction_Style::NN) {
+        global_status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, clique_neighborhood_reduction, critical_set_reduction, generalized_fold_reduction, nn_reduction>(
+                global_status.n);
     } else if (config.reduction_style == MISConfig::Reduction_Style::GREEDY) {
         global_status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, clique_neighborhood_reduction, critical_set_reduction, generalized_fold_reduction, greedy_reduction>(global_status.n);
     } else if (config.reduction_style == MISConfig::Reduction_Style::SIMPLE_ML) {
@@ -52,6 +56,13 @@ branch_and_reduce_algorithm::branch_and_reduce_algorithm(graph_access& G, const 
                 status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, clique_neighborhood_reduction, critical_set_reduction>(status.n);
             } else {
                 status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, clique_neighborhood_reduction, critical_set_reduction, generalized_fold_reduction, ml_reduction>(status.n);
+            }
+        } else if (this->config.reduction_style == MISConfig::Reduction_Style::NN) {
+            if (called_from_fold) {
+                status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, clique_neighborhood_reduction, critical_set_reduction>(status.n);
+            } else {
+                status.reductions = make_reduction_vector<neighborhood_reduction, fold2_reduction, clique_reduction, domination_reduction, twin_reduction, clique_neighborhood_reduction, critical_set_reduction, generalized_fold_reduction, nn_reduction>(
+                        status.n);
             }
         } else if (this->config.reduction_style == MISConfig::Reduction_Style::GREEDY) {
             if (called_from_fold) {
@@ -827,6 +838,50 @@ void branch_and_reduce_algorithm::build_graph_access(graph_access & G, std::vect
 	forall_nodes(G, node) {
 		G.setNodeWeight(node, status.weights[reverse_mapping[node]]);
 	} endfor
+}
+
+void branch_and_reduce_algorithm::build_graph_access(graph_access & G, std::vector<NodeID> & reverse_mapping, std::vector<NodeID>& mapping) const {
+    mapping.resize(status.graph.size(), UINT_MAX);
+    size_t edge_count = 0;
+
+    // Get number of edges and reorder nodes
+    size_t node_counter = 0;
+    for (NodeID node = 0; node < status.graph.size(); ++node) {
+        if (status.node_status[node] == IS_status::not_set) {
+            for (auto neighbor : status.graph[node]) {
+                edge_count++;
+            }
+
+            mapping[node] = node_counter;
+            reverse_mapping[node_counter] = node;
+            node_counter++;
+        }
+    }
+
+    // Create the adjacency array
+    std::vector<int> xadj(status.remaining_nodes + 1);
+    std::vector<int> adjncy(edge_count + 1);
+    size_t adjncy_counter = 0;
+
+    for (size_t i = 0; i < status.remaining_nodes; ++i) {
+        xadj[i] = adjncy_counter;
+
+        for (auto neighbor : status.graph[reverse_mapping[i]]) {
+            if (mapping[neighbor] == i) continue;
+            if (mapping[neighbor] == UINT_MAX) continue;
+            adjncy[adjncy_counter++] = mapping[neighbor];
+        }
+
+        std::sort(std::begin(adjncy) + xadj[i], std::begin(adjncy) + adjncy_counter);
+    }
+    xadj[status.remaining_nodes] = adjncy_counter;
+
+    // Build the graph
+    G.build_from_metis(status.remaining_nodes, &xadj[0], &adjncy[0]);
+
+    forall_nodes(G, node) {
+                G.setNodeWeight(node, status.weights[reverse_mapping[node]]);
+            } endfor
 }
 
 void branch_and_reduce_algorithm::build_induced_neighborhood_subgraph(graph_access& G, NodeID source_node) {

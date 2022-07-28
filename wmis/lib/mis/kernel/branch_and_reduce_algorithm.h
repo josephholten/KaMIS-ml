@@ -212,6 +212,8 @@ public:
 	void apply_branch_reduce_solution(graph_access & G);
 
 	void build_graph_access(graph_access& G, std::vector<NodeID>& reverse_mapping) const;
+
+    void build_graph_access(graph_access &G, std::vector<NodeID> &reverse_mapping, std::vector<NodeID> &mapping) const;
 };
 
 #endif //BRANCH_AND_REDUCE_SOLVER_H

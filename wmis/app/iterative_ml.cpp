@@ -80,7 +80,13 @@ int main(int argn, char **argv) {
         validate_path(mis_config.output_filename);
 
     // always choose the machine learning reductions
-    mis_config.reduction_style = MISConfig::ML;
+    if (mis_config.reduction_style != MISConfig::SIMPLE_NN) {
+        mis_config.reduction_style = MISConfig::ML;
+        algo_log::logger().set_name("iterative_ml");
+    } else {
+        mis_config.reduction_style = MISConfig::NN;
+        algo_log::logger().set_name("iterative_nn");
+    }
 
     mis_config.graph_filename = graph_filepath.substr(graph_filepath.find_last_of('/') + 1);
     if (mis_config.console_log) {
@@ -98,7 +104,6 @@ int main(int argn, char **argv) {
     graph_io::readGraphWeighted(G, graph_filepath, comments);
     assign_weights(G, mis_config);
 
-    algo_log::logger().set_name("iterative_ml");
     algo_log::logger().instance(graph_filepath);
     mis_log::instance()->set_graph(G);
 
