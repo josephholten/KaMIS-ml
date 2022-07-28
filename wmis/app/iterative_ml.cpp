@@ -134,7 +134,9 @@ int main(int argn, char **argv) {
                 is_weight += G.getNodeWeight(node);
         } endfor
 
-        // std::cout << "MIS_weight_check " << is_weight << std::endl;
+        if (MWIS_weight != is_weight) {
+            std::cout << "IS weight wrong, double check! " << MWIS_weight << is_weight << std::endl;
+        }
         algo_log::logger().solution(is_weight);
     }
 

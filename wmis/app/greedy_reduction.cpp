@@ -94,16 +94,19 @@ int main(int argn, char **argv) {
     assign_weights(G, mis_config);
 
     mis_log::instance()->set_graph(G);
+    algo_log::logger().instance(graph_filepath);
 
     //std::cout << "%nodes " << G.number_of_nodes() << std::endl;
     //std::cout << "%edges " << G.number_of_edges() << std::endl;
 
     auto start = std::chrono::system_clock::now();
+    algo_log::logger().start_timer();
 
     branch_and_reduce_algorithm reducer(G, mis_config);
     reducer.run_branch_reduce();
     NodeWeight MWIS_weight = reducer.get_current_is_weight();
 
+    algo_log::logger().end_timer();
     auto end = std::chrono::system_clock::now();
 
     std::chrono::duration<float> branch_reduce_time = end - start;
@@ -123,9 +126,14 @@ int main(int argn, char **argv) {
                 is_weight += G.getNodeWeight(node);
         } endfor
 
-        std::cout << "MIS_weight_check " << is_weight << std::endl;
+
+        if (MWIS_weight != is_weight) {
+            std::cout << "IS weight wrong, double check! " << MWIS_weight << is_weight << std::endl;
+        }
+        algo_log::logger().solution(is_weight);
     }
 
+    algo_log::logger().write(mis_config.log_file);
     if (mis_config.write_graph) graph_io::writeIndependentSet(G, mis_config.output_filename);
 
     std::cout << std::endl;
