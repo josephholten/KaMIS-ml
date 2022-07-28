@@ -210,6 +210,7 @@ private:
     std::vector<priority_t> priorities;
 };
 
+#if 0
 void test_min_priority_queue() {
     std::random_device rd;
     std::mt19937 rng(1);
@@ -272,5 +273,6 @@ void test_min_priority_queue() {
     for (int i = 0; i < maybe_sorted2.size() - 1; ++i)
         assert(maybe_sorted2[i] >= maybe_sorted2[i+1]);
 }
+#endif
 
 #endif //KAMIS_PRIORITY_QUEUE_H
