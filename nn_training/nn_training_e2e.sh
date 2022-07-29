@@ -1,7 +1,4 @@
 KAMIS_PATH=/home/jholten/KaMIS-ml
-if [[ $# != 2 ]]; then
-    echo "usage: [model-name] [data-folder]"
-fi
 
 existing_data=1
 for extension in {train,test}.{features,labels}; do 
