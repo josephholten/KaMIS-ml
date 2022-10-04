@@ -74,7 +74,6 @@ int main(int argn, char **argv) {
         return 0;
     }
 
-    // always choose the machine learning reductions
     mis_config.reduction_style = MISConfig::GREEDY;
 
     mis_config.graph_filename = graph_filepath.substr(graph_filepath.find_last_of('/') + 1);

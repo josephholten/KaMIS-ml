@@ -36,6 +36,7 @@ int main(int argc, char** argv) {
 
         std::vector<std::unordered_set<NodeID>> edge_sets(G.number_of_nodes());
 
+        // Check for duplicate or self-loop edges
         bool duplicates = false;
         bool selfloops = false;
         forall_nodes(G, node) {
@@ -52,6 +53,7 @@ int main(int argc, char** argv) {
         std::cout << "duplicates: " << (duplicates ? "true" : "false") << std::endl;
         std::cout << "self loops: " << (selfloops ? "true" : "false") << std::endl;
 
+        // Check whether graph is undirected
         bool undirected = true;
         for(size_t node = 0; node < edge_sets.size() && undirected; ++node) {
             for(auto neighbor : edge_sets[node]) {
@@ -71,7 +73,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    // analyze model
+    // analyze XGBoost model
     if (strCompare(argv[1],"model")) {
         BoosterHandle booster;
         safe_xgboost(XGBoosterCreate(nullptr, 0, &booster));

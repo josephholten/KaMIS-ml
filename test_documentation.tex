@@ -1,0 +1,46 @@
+\documentclass{article}
+
+\usepackage{pdfpages}
+\usepackage{fullpage}
+
+\title{Documentation for the tests of KaMIS-ml}
+\author{Joseph Holten}
+
+\begin{document}
+
+\maketitle
+
+\section{Problem of interest}
+The algorithms discussed all try to solve the maximum weighted independent set problem.
+
+
+\section{Algorithms Tested}
+The algorithms tested are:
+
+\begin{itemize}
+    \item \textit{iterative\_ml} A Reduce-and-Peel algorithm, using a machine learning heuristic for the peeling step.
+    \item \textit{greedy\_reduction} A Reduce-and-Peel algorithm, using an engineered heuristic for the peeling.
+    \item \textit{simple\_ml} A greedy algorithm, prioritising nodes based on a machine learning step.
+    \item \textit{simple\_greedy} A greedy algorithm, prioritising based on the engineered heuristic.
+\end{itemize}
+
+\noindent The features used in the machine learning heuristic are as follows:
+
+\begin{itemize}
+    \item 
+\end{itemize}
+
+The machine learning was done with a random-forest approach, and a neural network approach.
+
+\section{Random-Forest based Machine Learning}
+
+\subsection{Initial Tests}
+At first the machine learning was done using random forests. 
+We tested whether machine learning heuristics could at all compete with the engineered heuristic in the peeling step.
+For this, we compared iterative\_ml and greedy\_reduction in solution quality, the ratio of the solution produced by the algorithm and the optimal solution calculated by the Branch-and-Bound solver from KaMIS.
+The set of graphs to be tested, consisted of unweighted graphs, assigned random weights. The method of weight generation was also varied, to observe changes in the results.
+
+\includepdf[pages=-]{misc/charting/greedy_tests.pdf}
+\includepdf[pages=-]{misc/charting/greedy_ml_tests.pdf}
+
+\end{document}

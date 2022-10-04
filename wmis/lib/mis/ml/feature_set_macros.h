@@ -5,6 +5,7 @@
 #ifndef KAMIS_FEATURE_SET_MACROS_H
 #define KAMIS_FEATURE_SET_MACROS_H
 
+// Specify during compile-time what set of features to use
 #define LARGE 0
 #define GREEDY 1
 #define WITH_LS 2
@@ -15,6 +16,7 @@
 #define FEATURE_SET WITH_LS
  */
 
+// Default FEATURE_SET value
 #ifndef FEATURE_SET
     #define FEATURE_SET LARGE
 #endif
@@ -67,7 +69,7 @@
 #endif
 
 
-// dependencies
+// Dependencies: some features depend on calculation of other features
 #ifdef F_CHI2_W_DEG
     #define F_W_DEG
 #endif

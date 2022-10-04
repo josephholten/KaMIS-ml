@@ -77,7 +77,7 @@ int main(int argn, char **argv) {
     if (mis_config.write_graph)
         validate_path(mis_config.output_filename);
 
-    // always choose the machine learning reductions
+    // If SIMPLE_NN (neural networks) haven't been specified, default to SIMPLE_ML (random forests)
     if (mis_config.reduction_style != MISConfig::SIMPLE_NN)
         mis_config.reduction_style = MISConfig::SIMPLE_ML;
     else
@@ -112,6 +112,7 @@ int main(int argn, char **argv) {
                 is_weight += G.getNodeWeight(node);
         } endfor
 
+        // Check if weight of IS after inverse reduction is equal to the solution calculated during reduction
         if (algo_log::logger()["solution"] != is_weight) {
             std::cerr << "ERROR: failed MIS weight check! " << algo_log::logger()["solution"] << " != " << is_weight << std::endl;
             return 1;

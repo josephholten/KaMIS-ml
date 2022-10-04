@@ -12,6 +12,7 @@
 #include <algorithm>
 #include "graph_access.h"
 
+// Copy of the dynamic_graph class with an added field for node weights, used by the simple_greedy algorithm
 class weighted_dynamic_graph {
 public:
 	class neighbor_list {

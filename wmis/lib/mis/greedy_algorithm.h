@@ -14,6 +14,7 @@
 
 enum IS_status { included = 1, excluded = 0, not_set = -1};
 
+// Implementation of a simple greedy algorithm, not using any reductions
 template<typename Heuristic>
 class greedy_algorithm {
 public:
@@ -29,12 +30,13 @@ public:
 
     void run() {
         while(!queue.empty()) {
-            // update
+            // update priority values for changed nodes
             heuristic.updateMany(graph, changed, [&](NodeID node, priority_t new_priority){ queue.set(node, new_priority); });
 
             changed.clear();
             changed_set.clear();
 
+            // if the top node is not yet included, include it, otherwise continue
             if (size_t top = queue.pop(); status[top] == IS_status::not_set)
                 set_status(top, IS_status::included);
         }
@@ -64,10 +66,12 @@ private:
         if (is_status == IS_status::included) {
             is_weight += graph.getNodeWeight(node);
 
+            // If node is included, exclude the neighbours to maintain a feasible solution
             for (auto neighbor : graph[node]) {
                 status[neighbor] = IS_status::excluded;
                 graph.hide_node(neighbor);
 
+                // By hiding the neighbor, its neighbors will change
                 for (auto neighbors_neighbor : graph[neighbor]) {
                     if (neighbors_neighbor != node && changed_set.add(neighbors_neighbor))
                         changed.push_back(neighbors_neighbor);

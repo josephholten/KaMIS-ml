@@ -10,6 +10,7 @@ bool is_IS(graph_access& G);
 // void perform_ils(const MISConfig& mis_config, graph_access& G, NodeWeight weight_offset);
 // NodeWeight extractReductionOffset(const std::string & comments);
 
+// Class for running the weighted local search algorithm
 class weighted_ls {
 private:
     MISConfig mis_config;

@@ -1230,6 +1230,8 @@ bool nn_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
     start = algo_log::logger().get_time();
     // for row in feature matrix
     float max_prediction = std::numeric_limits<float>::lowest();
+
+#if 1
     for (int v_idx = 0; v_idx < marker.current_size(); ++v_idx) {
         NodeID original_node_id = marker.current_vertex(v_idx);
         if (status.node_status[marker.current_vertex(v_idx)] == IS_status::not_set) {
@@ -1242,9 +1244,6 @@ bool nn_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
             queue.set(original_node_id, prediction);
         }
     }
-
-    std::cout << "predicting " << (algo_log::logger().get_time() - start).count() << std::endl;
-
     while(!queue.empty()) {
         NodeID top = queue.pop();
         if (status.node_status[top] == IS_status::not_set) {
@@ -1252,7 +1251,25 @@ bool nn_reduction::reduce(branch_and_reduce_algorithm *br_alg) {
             break;
         }
     }
+#endif
 
+#if 1
+    NodeID max_node = 0;
+    forall_nodes(G,node) {
+        std::vector<float> row(feature_mat.getRow(node).begin(), feature_mat.getRow(node).end());
+        const fdeep::tensor row_tensor(fdeep::tensor_shape(static_cast<std::size_t>(ml_features::FEATURE_NUM)),row);
+        float prediction = model.unsafe_get_just().predict_single_output({row_tensor});
+        if (prediction > max_prediction) {
+            max_prediction = prediction;
+            max_node = node;
+        }
+    } endfor
+
+
+    br_alg->set(reverse_mapping[max_node], IS_status::included);
+#endif
+
+    std::cout << "predicting " << (algo_log::logger().get_time() - start).count() << std::endl;
     return true;
 }
 

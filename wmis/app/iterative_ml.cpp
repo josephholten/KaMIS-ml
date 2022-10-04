@@ -79,7 +79,6 @@ int main(int argn, char **argv) {
     if (mis_config.write_graph)
         validate_path(mis_config.output_filename);
 
-    // always choose the machine learning reductions
     if (mis_config.reduction_style != MISConfig::SIMPLE_NN) {
         mis_config.reduction_style = MISConfig::ML;
         algo_log::logger().set_name("iterative_ml");

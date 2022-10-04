@@ -14,14 +14,17 @@
 
 // priority_t must be integer-like type
 
+// Whether the minimum or maximum element is the top element of the priority queue
 enum class priority_direction { MIN, MAX };
 enum order_t { up = 0b100, down = 0b010, equal = 0b001};
 
+// Priority Queue class based on a binary heap, used by the engineered greedy algorithm
 template<typename priority_t, priority_direction direction>
 class priority_queue {
 public:
     priority_queue() = default;
 
+    // Initialize empty priority queue with maximum size n
     explicit priority_queue(size_t n) {
         heap.resize(n);
         std::iota(heap.begin(), heap.end(), 0);
@@ -34,13 +37,14 @@ public:
         _size = n;
     };
 
+    // Initialize from vector of priorities, vector-indices are the keys to the priority queue
     explicit priority_queue(std::vector<priority_t> priorities)
         : priority_queue(priorities.size())
     {
         build(std::move(priorities));
     }
 
-    // keys are the indices
+    // Build the priority-queue from a vector
     void build(std::vector<priority_t> priorities) {
         this->priorities = std::move(priorities);
 
@@ -57,6 +61,7 @@ public:
         }
     };
 
+    // Remove the top element and return its value
     size_t pop() {
         assert(_size >= 1);
         auto min = heap.front();
@@ -94,6 +99,8 @@ public:
         return priorities[key];
     }
 
+    // Return the correct order of priorities p1, p2
+    // (dependent on whether the minimum or maximum element should be at the top)
     order_t order(priority_t p1, priority_t p2) {
         if constexpr(direction == priority_direction::MIN) {
             if (p1 < p2)

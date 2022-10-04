@@ -16,6 +16,11 @@
 // Configuration for the calculation of the MIS
 struct MISConfig {
     enum Weight_Source {FILE, HYBRID, UNIFORM, GEOMETRIC};
+    // ML: regular reductions + random forest heuristic peeling
+    // NN: regular reductions + neural network heuristic peeling
+    // GREEDY: regular reductions + engineered heuristic peeling
+    // SIMPLE_ML: only random forest heuristic peeling
+    // SIMPLE_NN: only neural network heuristic peeling
     enum Reduction_Style {NORMAL, DENSE, ML, NN, GREEDY, SIMPLE_ML, SIMPLE_NN};
 
     // Name of the graph file.

@@ -10,11 +10,13 @@
 #include "util.h"
 #include "parse_parameters_ml.h"
 
+// Engineered heuristic: include the node in the IS with minimum value of sum of weight of neighbours minus weight of node
 class ht_heuristic {
 public:
     typedef NodeWeight priority_t;
     static const priority_direction direction = priority_direction::MIN;
 
+    // The update function updates the priority of the nodes to the new value of the heuristic
     template<typename Function>
     void updateMany(const weighted_dynamic_graph& graph, const std::vector<NodeID>& nodes, Function update) {
         for (auto node : nodes)
@@ -47,7 +49,6 @@ void check_IS(graph_access& G, std::vector<IS_status> IS, NodeWeight weight) {
 }
 
 int main(int argc, char** argv) {
-    // test_min_priority_queue();
     algo_log::logger().set_name("simple_greedy");
 
     MISConfig mis_config;

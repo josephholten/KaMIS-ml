@@ -26,16 +26,20 @@ int main(int argc, char** argv) {
 
     std::cout << "strict graph {" << std::endl;
 
-    // nodes
+    // nodes, their fill colors (IS status) and their label (weight)
     std::cout << "  {" << std::endl;
     std::cout << "    node [style=filled]" << std::endl;
     forall_nodes(G, node) {
         std::cout << "    " << node << " [";
         if (argc >= 3) {
             std::string color;
+
+            // only one IS, so color means included or not included
             if (argc == 3) {
                  color = is_1[node] ? "lightblue" : "white";
-            } else if (argc == 4) {
+            }
+            // two separate IS, so color indicates inclusion in (which) one, none or both
+            else if (argc == 4) {
                 if (is_1[node] == 1 && is_2[node] == 1) {
                     color = "lightblue";
                 }
@@ -62,6 +66,7 @@ int main(int argc, char** argv) {
 
     std::cout << "  }" << std::endl;
 
+    // edges
     forall_nodes(G, node) {
         std::cout << "  " << node << " -- {";
         forall_out_edges(G, edge, node) {

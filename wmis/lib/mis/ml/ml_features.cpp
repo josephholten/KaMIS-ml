@@ -378,7 +378,6 @@ void ml_features::calculate_features(graph_access& G) {
 
 void ml_features::calculate_features(const weighted_dynamic_graph& G, const std::vector<NodeID>& nodes) {
     // precompute values
-
     NodeWeight total_weight = 0;
     NodeWeight min_weight = std::numeric_limits<NodeWeight>::max();
 
